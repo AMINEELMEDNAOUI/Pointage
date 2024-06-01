@@ -1,0 +1,48 @@
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #afb8c1; 
+  color: #fff;
+}
+
+
+
+ header h5 {
+  margin-left: 10px; /* Ajoute un espace entre le logo et le titre */
+  color:black;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-info span {
+  margin-right: 10px;
+}
+
+.user-info button {
+  background-color: transparent;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.user-info button:hover {
+  text-decoration: underline;
+}
+
+/* Styles pour la version mobile */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column; /* Colonne sur les appareils mobiles */
+    padding: 10px;
+  }
+
+  .logo, .user-info {
+    margin-bottom: 10px; 
+    text-align: center; 
+  }
+}

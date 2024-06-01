@@ -1,0 +1,33 @@
+
+hr {
+  border: none; 
+  height: 4px; 
+  background-color: black; 
+  margin-bottom: 20px ;
+  font-weight: bold; 
+}
+.select-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.select-wrapper {
+  flex: 1;
+  margin-right: 20px;
+  
+}
+
+.select-wrapper:last-child {
+  margin-right: 0;
+  
+}
+
+label {
+  margin-right: 10px;
+}
+
+.class1{
+  background-color: aqua;
+}

@@ -1,0 +1,28 @@
+body {
+    background-color: #ad2e4a;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo img.logo-image {
+    height: 70px; 
+    width: auto;
+    margin: 0; 
+  }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  
+  .full-page-container {
+    width: 100%;
+    height: 100vh;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  
+  
+  
