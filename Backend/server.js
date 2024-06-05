@@ -76,11 +76,25 @@ app.get('/villes', (req, res) => {
 
 
 app.get('/planning', (req, res) => {
-    const client = req.query.client; 
-    const site = req.query.site; 
-    const month = req.query.month; 
-    const year = req.query.year; 
-    const sql = `SELECT PERSMATR, PLANDATE FROM PLANNING WHERE TIRID = '${client}' AND ADRID = '${site}' AND YEAR(PLANDATE) = '${year}' AND MONTH(PLANDATE) = '${month}';`;
+    const clientId = req.query.TIRID; 
+    const siteId = req.query.ADRID; 
+    const MONTH =req.query.MONTH ;
+    const YEAR = req.query.YEAR ;
+    const pole = req.query.pole;
+    const sql = `SELECT PL.PERSMATR , P.PERSNOPE , P.PERSPRPE , PL.PLANPAJO, TA.LIBEABR  FROM EXT_RHPLANNIN PL JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT WHERE PL.TIRID = '${clientId}'  AND PL.ADRID = '${siteId}'  AND MONTH(PL.PLANDATE) = '${MONTH}'  AND YEAR(PL.PLANDATE) = '${YEAR}'  AND PL.STATNATURE = '${pole}';`;
+    db.query(sql, (err, data) => {
+        if (err) return res.json(err);
+        return res.json(data);
+    })
+})
+
+app.get('/planning2', (req, res) => {
+    const clientId = req.query.TIRID; 
+    const siteId = req.query.ADRID; 
+    const MONTH =req.query.MONTH ;
+    const YEAR = req.query.YEAR ;
+    const pole = req.query.pole;
+    const sql = `SELECT DISTINCT LIBEABR FROM EXT_RHDETASTAT WHERE IDDETASTAT IN (SELECT STATCLAS FROM EXT_RHPLANNIN WHERE TIRID='${clientId}' AND ADRID='${siteId}' AND MONTH(PLANDATE)='${MONTH}' AND YEAR(PLANDATE)='${YEAR}' AND STATNATURE='${pole}')`;
     db.query(sql, (err, data) => {
         if (err) return res.json(err);
         return res.json(data);

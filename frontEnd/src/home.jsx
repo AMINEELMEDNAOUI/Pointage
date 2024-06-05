@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit } from '@fortawesome/free-solid-svg-icons';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { faPrint } from '@fortawesome/free-solid-svg-icons';
+import { faWater } from '@fortawesome/free-solid-svg-icons';
+import { faUmbrellaBeach } from '@fortawesome/free-solid-svg-icons';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { Select } from 'antd';
-
 const { Option } = Select;
 
 function Home() {
@@ -15,35 +16,34 @@ function Home() {
   const [selectedSitesId, setSelectedSitesId] = useState('');
   const [periodes, setPeriodes] = useState([]);
   const [selectedPeriodes, setSelectedPeriodes] = useState('');
-  const [poles,setPoles] = useState([]);
-  const [selectedPoles ,setSelectedPoles] =useState('')
-  const [villes,setVilles] = useState([]);
-  const [selectedVilles ,setSelectedVilles] =useState('')
+  const [poles, setPoles] = useState([]);
+  const [selectedPoles, setSelectedPoles] = useState('');
+  const [villes, setVilles] = useState([]);
+  const [selectedVilles, setSelectedVilles] = useState('');
+  const [salaries, setSalaries] = useState([]);
   const [planningData, setPlanningData] = useState([]);
-  const [planningDataFromFetch, setPlanningDataFromFetch] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [currentState, setCurrentState] = useState('');
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [matriculeValue, setMatriculeValue] = useState('');
-  const [searchVisible, setSearchVisible] = useState(false);
-   
+  
   useEffect(() => {
     fetch(`http://localhost:8081/periodes`)
       .then(res => res.json())
       .then(data => setPeriodes(data))
       .catch(err => console.log(err));
-  }, );
+  }, []);
 
   useEffect(() => {
     if (selectedPeriodes && selectedPoles) {
       const [MONTH, YEAR] = selectedPeriodes.split('-');
       const [pole, npole] = selectedPoles.split('-');
-      
-    fetch(`http://localhost:8081/clients?MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}`)
-      .then(res => res.json())
-      .then(data => setClients(data))
-      .catch(err => console.log(err));
-  }}, [selectedPeriodes,selectedPoles]);
+      fetch(`http://localhost:8081/clients?MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}`)
+        .then(res => res.json())
+        .then(data => setClients(data))
+        .catch(err => console.log(err));
+    }
+  }, [selectedPeriodes, selectedPoles]);
 
   useEffect(() => {
     if (selectedPeriodes && selectedPoles && selectedClientsId) {
@@ -55,7 +55,7 @@ function Home() {
         .then(data => setSites(data))
         .catch(err => console.log(err));
     }
-  }, [selectedPeriodes,selectedPoles,selectedClientsId]);
+  }, [selectedPeriodes, selectedPoles, selectedClientsId]);
 
   useEffect(() => {
     if (selectedPeriodes) {
@@ -65,7 +65,7 @@ function Home() {
         .then(data => setPoles(data))
         .catch(err => console.log(err));
     }
-  }, [selectedPeriodes])
+  }, [selectedPeriodes]);
 
   useEffect(() => {
     if (selectedPeriodes && selectedPoles && selectedClientsId && selectedSitesId) {
@@ -78,8 +78,21 @@ function Home() {
         .then(data => setVilles(data))
         .catch(err => console.log(err));
     }
-  }, [selectedPeriodes,selectedPoles,selectedClientsId,selectedSitesId])
- 
+  }, [selectedPeriodes, selectedPoles, selectedClientsId, selectedSitesId]);
+
+  useEffect(() => {
+    if (selectedPeriodes && selectedPoles && selectedClientsId && selectedSitesId) {
+      const [TIRID, CNAME] = selectedClientsId.split('-');
+      const [ADRID, SNAME] = selectedSitesId.split('-');
+      const [MONTH, YEAR] = selectedPeriodes.split('-');
+      const [pole, npole] = selectedPoles.split('-');
+      fetch(`http://localhost:8081/planning?TIRID=${TIRID}&ADRID=${ADRID}&MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}`)
+        .then(res => res.json())
+        .then(data => setSalaries(data))
+        .catch(err => console.log(err));
+    }
+  }, [selectedPeriodes, selectedPoles, selectedClientsId, selectedSitesId]);
+
 
   const handleClientChange = value => {
     setSelectedClientsId(value);
@@ -109,381 +122,217 @@ function Home() {
     setSelectedClientsId('');
     setSelectedSitesId('');
     setSelectedVilles('');
-  }
-  const toggleSearch = () => {
-    setSearchVisible(!searchVisible);
   };
 
-  useEffect(() => {
-    if (selectedPeriodes) {
-      const [month, year] = selectedPeriodes.split('/');
-      const daysInMonth = new Date(year, month - 1, 0).getDate();
-
-      const initialData = {};
-
-      for (let i = 1; i <= daysInMonth; i++) {
-        initialData[i] = {};
-      }
-
-      setPlanningData(initialData);
-    }
-  }, [selectedPeriodes]);
-
-  useEffect(() => {
-    if (selectedClientsId && selectedSitesId && selectedPeriodes) {
-      const [month, year] = selectedPeriodes.split('/');
-
-      const url = `http://localhost:8081/planning?client=${selectedClientsId}&site=${selectedSitesId}&month=${month}&year=${year}`;
-
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          setPlanningDataFromFetch(data);
-        })
-        .catch(err => console.log(err));
-    }
-  }, [selectedClientsId, selectedSitesId, selectedPeriodes]);
-
-  const formatDate = dateString => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
-  const formattDate = dateString => {
-    const date = new Date(dateString);
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${month}/${year}`;
-  };
-
-  const handleUpdate = (matricule, date, currentState) => {
-    setSelectedDate(date);
-    setCurrentState(currentState);
-    setIsFormVisible(true);
-    setMatriculeValue(matricule);
-  };
-
-  const handleInputChange = event => {
-    setCurrentState(event.target.value);
-  };
-
-  const handleFormSubmit = event => {
-    event.preventDefault();
-    const url = 'http://localhost:8081/planning';
-    const [year, month, day] = selectedDate.split('-');
-
-    const [selectedMonth, selectedYear] = selectedPeriodes.split('/');
-    const requestBody = {
-      client: selectedClientsId,
-      site: selectedSitesId,
-      matricule: matriculeValue,
-      annee: selectedYear,
-      mois: selectedMonth,
-      date: selectedDate
-    };
-
-    if (currentState === 'O') {
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      })
-        .then(res => res.json())
-        .then(data => {
-          console.log(data);
-          fetchUpdatedData();
-        })
-        .catch(err => console.log(err));
-    } else {
-      fetch(url, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      })
-        .then(res => res.json())
-        .then(data => {
-          console.log(data);
-          fetchUpdatedData();
-        })
-        .catch(err => console.log(err));
-    }
-
-    setIsFormVisible(false);
-  };
-
-  const fetchUpdatedData = () => {
-    const [month, year] = selectedPeriodes.split('/');
-
-    const url = `http://localhost:8081/planning?client=${selectedClientsId}&site=${selectedSitesId}&month=${month}&year=${year}`;
-
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        setPlanningDataFromFetch(data);
-      })
-      .catch(err => console.log(err));
-  };
-
-  const handleCancel = () => {
-    setIsFormVisible(false);
-  };
-
-  const uniqueMonthsAndYears = [...new Set(periodes.map(period => formattDate(period.PLANDATE)))];
-
-  // const uniqueMatricules = planningDataFromFetch.reduce((uniqueMatricules, matriculeData) => {
-  //   if (!uniqueMatricules.includes(matriculeData.PERSMATR)) {
-  //     uniqueMatricules.push(matriculeData.PERSMATR);
-  //   }
-  //   return uniqueMatricules;
-  // }, []);
-
-  // const [selectedMonth, selectedYear] = selectedPeriodes.split('/');
-
-  function getMonthName(monthNumber) {
-    const monthNames = [
-        'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-        'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-    ];
-    return monthNames[monthNumber - 1]; 
-}
 
   const handlePrint = () => {
     window.print();
   };
-  
+
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month, 0).getDate();
+  };
+
+  const getMonthName = monthNumber => {
+    const monthNames = [
+      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    ];
+    return monthNames[monthNumber - 1];
+  };
+
+  const daysInMonth = selectedPeriodes ? getDaysInMonth(...selectedPeriodes.split('-')) : 0;
+
+  const getDayAbbreviation = dayNumber => {
+    const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+    return dayNames[dayNumber ];
+  };
 
   return (
     <>
-     <p className='header-title'>Pointage - Cycles par chantier</p>
-      <div className='select-container '>
-      <div className="pcvc-container">
-      <p className='pcvc-title'>Critère de recherche</p>
-        <div className='select-w'>
-         <div className='select-pc'>
-          <div className="select-p">
-        <label htmlFor='poleSelect'>Pôle</label>
-        <Select className='pole-select'
-            id='poleSelect'
-            value={selectedPoles}
-            onChange={handlePoleChange}
-            disabled={!selectedPeriodes}
-            showSearch
-            filterOption={(input, option) =>
-              typeof option.children === 'string' &&
-              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            }
-        >
-            <Option value='' disabled hidden>Sélectionnez un pôle</Option>
-            {poles.map((pole, i) => (
-              <Option key={i} value={`${pole.IDDETASTAT}-${pole.LIBESTAT}`}>
-                {`${pole.LIBESTAT}`}
-              </Option>
-            ))}
-        </Select>
+      <p className='header-title'>Pointage - Cycles par chantier</p>
+      <div className='select-container'>
+        <div className="pcvc-container">
+          <p className='pcvc-title'>Critère de recherche</p>
+          <div className='select-w'>
+            <div className='select-pc'>
+              <div className="select-p">
+                <label htmlFor='poleSelect'>Pôle</label>
+                <Select
+                  className='pole-select'
+                  id='poleSelect'
+                  value={selectedPoles}
+                  onChange={handlePoleChange}
+                  disabled={!selectedPeriodes}
+                  showSearch
+                  filterOption={(input, option) =>
+                    typeof option.children === 'string' &&
+                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  <Option value='' disabled hidden>Sélectionnez un pôle</Option>
+                  {poles.map((pole, i) => (
+                    <Option key={i} value={`${pole.IDDETASTAT}-${pole.LIBESTAT}`}>
+                      {`${pole.LIBESTAT}`}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+              <div className="select-cl">
+                <label htmlFor='clientSelect'>Clients</label>
+                <Select
+                  className='cvc-select'
+                  id='clientSelect'
+                  value={selectedClientsId}
+                  onChange={handleClientChange}
+                  disabled={!selectedPoles}
+                  showSearch
+                  filterOption={(input, option) =>
+                    typeof option.children === 'string' &&
+                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  <Option value='' disabled hidden>Sélectionnez un client</Option>
+                  {clients.map((client, i) => (
+                    <Option key={i} value={`${client.IDDETASTAT}-${client.LIBESTAT}`}>
+                      {`${client.LIBESTAT}`}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+            <div className='select-vc'>
+              <div className="select-v">
+                <label htmlFor='villeSelect'>Ville</label>
+                <Select
+                  className='cvc-select'
+                  id='villeSelect'
+                  value={selectedVilles}
+                  onChange={handleVilleChange}
+                  disabled={!selectedSitesId}
+                  showSearch
+                  filterOption={(input, option) =>
+                    typeof option.children === 'string' &&
+                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  <Option value='' disabled hidden>Sélectionnez une ville</Option>
+                  {villes.map((ville, i) => (
+                    <Option key={i} value={`${ville.IDDETASTAT}-${ville.LIBESTAT}`}>
+                      {`${ville.LIBESTAT}`}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+              <div className="select-ch">
+                <label htmlFor='siteSelect'>Chantier</label>
+                <Select
+                  className='cvc-select'
+                  id='siteSelect'
+                  value={selectedSitesId}
+                  onChange={handleSiteChange}
+                  disabled={!selectedClientsId}
+                  showSearch
+                  filterOption={(input, option) =>
+                    typeof option.children === 'string' &&
+                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  <Option value='' disabled hidden>Sélectionnez un chantier</Option>
+                  {sites.map((site, i) => (
+                    <Option key={i} value={`${site.IDDETASTAT}-${site.LIBESTAT}`}>
+                      {`${site.LIBESTAT}`}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="select-cl">
-          <label htmlFor='clientSelect'>Clients</label>
-        <Select className='cvc-select'
-             id='clientSelect'
-             value={selectedClientsId}
-             onChange={handleClientChange}
-             disabled={!selectedPoles}
-            showSearch
-            filterOption={(input, option) =>
-              typeof option.children === 'string' &&
-              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            }
-        >
-            <Option value='' disabled hidden>Sélectionnez un client</Option>
-            {clients.map((client, i) => (
-              <Option key={i} value={`${client.IDDETASTAT}-${client.LIBESTAT}`}>
-                {`${client.LIBESTAT}`}
-              </Option>
-            ))}
-        </Select>
-        </div>
-        </div>
-        <div className='select-vc'> 
-        <div className="select-v">
-          <label htmlFor='villeSelect'>Ville</label>
-        <Select className='cvc-select'
-            id='villeSelect'
-            value={selectedVilles}
-            onChange={handleVilleChange}
-            disabled={!selectedSitesId}
-            showSearch
-            filterOption={(input, option) =>
-              typeof option.children === 'string' &&
-              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            }
-        >
-            <Option value='' disabled hidden>Sélectionnez une ville</Option>
-            {villes.map((ville, i) => (
-              <Option key={i} value={`${ville.IDDETASTAT}-${ville.LIBESTAT}`}>
-                {`${ville.LIBESTAT}`}
-              </Option>
-            ))}
-        </Select>
-        </div>
-          <div className="select-ch">   
-          <label htmlFor='siteSelect'>Chantier</label>
-        <Select className='cvc-select'
-            id='siteSelect'
-            value={selectedSitesId}
-            onChange={handleSiteChange}
-            disabled={!selectedClientsId}
-            showSearch
-            filterOption={(input, option) =>
-              typeof option.children === 'string' &&
-              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            }
-        >
-            <Option value='' disabled hidden>Sélectionnez un chantier</Option>
-            {sites.map((site, i) => (
-              <Option key={i} value={`${site.IDDETASTAT}-${site.LIBESTAT}`}>
-                {`${site.LIBESTAT}`}
-              </Option>
-            ))}
-        </Select>
-        </div>
-        </div>
-        </div>
-        </div>
-
         <div className='period-container'>
           <p className='period-title'>Période du planning</p>
           <div className="period-select">
-          
-        <label htmlFor='periodSelect'>Période</label>
-        <Select className='select-pe'
-            id='periodSelect'
-            value={selectedPeriodes}
-            onChange={handlePeriodeChange}
-            showSearch
-            filterOption={(input, option) =>
-              typeof option.children === 'string' &&
-              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            }
-        >
-            <Option value='' disabled hidden>Sélectionnez une période</Option>
-            {periodes.map((periode, i) => (
-              <Option key={i} value={`${periode.Mois}-${periode.Annee}`}>
-                {`${getMonthName(periode.Mois)} ${periode.Annee}`}
-              </Option>
-            ))}
-        </Select>
-        </div>
-        <div className="button-container">
-          <div className="print-container">
-             <button>
-             A
-             </button>
-             <button>
-             B
-             </button>
-             <button onClick={handlePrint}>
-             Imprimer
-             </button>
+            <label htmlFor='periodSelect'>Période</label>
+            <Select
+              className='select-pe'
+              id='periodSelect'
+              value={selectedPeriodes}
+              onChange={handlePeriodeChange}
+              showSearch
+              filterOption={(input, option) =>
+                typeof option.children === 'string' &&
+                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              <Option value='' disabled hidden>Sélectionnez une période</Option>
+              {periodes.map((periode, i) => (
+                <Option key={i} value={`${periode.Mois}-${periode.Annee}`}>
+                  {`${getMonthName(periode.Mois)} ${periode.Annee}`}
+                </Option>
+              ))}
+            </Select>
           </div>
-          <div className="consolider">
-          <button>
-             Consolider
-          </button>
-          <button>
-             C
-          </button>
+         
+
+          <div className="button-container">
+            <div className="print-container">
+              <button className='beach-button'>
+              <FontAwesomeIcon icon={faWater} className='faWater'/> 
+              </button>
+              <button className='umbrella-button'>
+              <FontAwesomeIcon icon={faUmbrellaBeach} className='faUmbrellaBeach' /> 
+              </button>
+              <button className="print-button" onClick={handlePrint}>
+              Imprimer <FontAwesomeIcon icon={faPrint} className='faPrint'/> 
+              </button>
+            </div>
+            <div className="consolider">
+              <button className='consolider-button'>
+                Consolider <FontAwesomeIcon icon={faLock} className='falock' /> 
+              </button>
+              <button className='exit-button'>
+              <FontAwesomeIcon icon={faSignOutAlt} className='faSignOutAlt'/>
+              </button>
+            </div>
           </div>
         </div>
-
-
-        </div>
-       
       </div>
-      
-      {isFormVisible && (
-        <form className='form-container m-lg-3' onSubmit={handleFormSubmit}>
-          <div className="form-group">
-            <label htmlFor="selectedDate" className="label fw-bolder ">Date:</label>
-            <p id="selectedDate" className="date fw-medium ">{selectedDate}</p>
-          </div>
-          <div className="form-group">
-            <label htmlFor="currentStateInput" className="label fw-bolder mb-2  ">État du planning :</label>
-            <select id="currentStateInput" value={currentState} onChange={handleInputChange} className="form-control w-25">
-              <option value="O">O</option>
-              <option value="N">N</option>
-            </select>
-          </div>
-          <div className="button-group mt-3">
-            <button type="submit" className="btn btn-primary me-2 ">Modifier</button>
-            <button type="button" onClick={handleCancel} className="btn btn-secondary">Annuler</button>
-          </div>
-        </form>
-      )}
-      {selectedPeriodes && selectedClientsId && selectedSitesId && (
-        <>
-          {planningDataFromFetch.length === 0 ? (
-            <div className='table-container'>
-              <p style={{ fontWeight: 'bolder', fontSize: '50px', textAlign: 'center', marginTop: '170px' }}>Pas de données pour le moment ...</p>
-            </div>
-          ) : (
-            
-            <div className='table-container '>
-              {/* <table border={4}>
-                <thead>
-                  <tr>
-                    <th>Matricule</th>
-                    {[...Array(new Date(selectedYear, selectedMonth, 0).getDate())].map((_, i) => {
-                      const currentDate = new Date(selectedYear, selectedMonth - 1, i + 1);
-                      return (
-                        <th key={i}>{formatDate(currentDate)}</th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {uniqueMatricules.map((uniqueMatricule, index) => {
-                    const matriculeDates = planningDataFromFetch
-                      .filter(matriculeData => matriculeData.PERSMATR === uniqueMatricule)
-                      .map(matriculeData => matriculeData.PLANDATE);
-
-                    return (
-                      <tr key={index}>
-                        <td className='mat'>{uniqueMatricule}</td>
-                        {[...Array(new Date(selectedYear, selectedMonth, 0).getDate())].map((_, i) => {
-                          const currentDate = new Date(selectedYear, selectedMonth - 1, i + 1);
-                          const formattedDate = currentDate.toISOString().split('T')[0];
-                          const matriculeDatesFormatted = matriculeDates.map(date => new Date(date).toISOString().split('T')[0]);
-                          const currentState = matriculeDatesFormatted.includes(formattedDate) ? 'O' : 'N';
-                          console.log(matriculeDatesFormatted);
-                          console.log(formattedDate);
-
-                          return (
-                            <td key={i} className={currentState === 'O' ? "text-green" : "text-red"}>
-                              {currentState}
-                              <FontAwesomeIcon
-                                icon={faEdit}
-                                className="update-icon"
-                                onClick={() => handleUpdate(uniqueMatricule, formattedDate, currentState)}
-                              />
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table> */}
-              
-            </div>
-          )}
-        </>
+      {selectedPeriodes && selectedPoles && selectedClientsId && selectedSitesId &&(
+      <div className="table-c">
+      <div className="table-container">
+        <table border={3}>
+          <thead>
+            <tr>
+          <th colSpan="2" style={{ width: '200px' }}> </th>
+          {Array.from({ length: daysInMonth }, (_, i) => (
+                <th key={i + 1} style={{ width: '40px' }}>{String(i + 1).padStart(2, '0')}</th>
+              ))}
+          </tr>
+            <tr>
+           
+              <th style={{ width: '250px' , textAlign:'center'}}>Salariés</th>
+              <th style={{ width: '50px' }}></th>
+              {Array.from({ length: daysInMonth }, (_, i) => (
+      <th key={i + 1} style={{ width: '40px' }}>{getDayAbbreviation(new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1).getDay())}</th>
+    ))}
+            </tr>
+          </thead>
+          <tbody>
+            {salaries.map((data, index) => (
+              <tr key={index}>
+                <td style={{fontSize:'15px'}}>{data.PERSMATR}/-{data.PERSNOPE} {data.PERSPRPE}</td>
+                {Array.from({ length: daysInMonth }, (_, i) => (
+                  <td key={i + 1}>
+                    {data[`D${(i + 1).toString().padStart(2, '0')}`]}
+                  </td>
+                  
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      </div>
       )}
     </>
   );
