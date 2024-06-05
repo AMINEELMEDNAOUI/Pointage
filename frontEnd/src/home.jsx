@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './home.css';
-import Header from './header.jsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit } from '@fortawesome/free-solid-svg-icons';
 import jsPDF from 'jspdf';
@@ -247,66 +246,6 @@ function Home() {
 
   // const [selectedMonth, selectedYear] = selectedPeriodes.split('/');
 
-  // const handlePrint = () => {
-  //   const doc = new jsPDF('landscape');
-
-  // // Ajouter un titre
-  // doc.setFontSize(18);
-  // doc.text('Planning', 14, 20);
-
-  // // Ajouter le nom du client
-  // doc.setFontSize(12);
-  // doc.text(`Client: ${selectedClientsId}`, 14, 40);
-
-  // // Ajouter le nom du site
-  // doc.text(`Site: ${selectedSitesId}`, 14, 50);
-
-  // // Ajouter la période
-  // doc.text(`Période: ${selectedPeriodes}`, 14, 60);
-
-  // // Ajouter un espace
-  // doc.text('', 14, 70);
-  
-  
-  
-  //   // Préparer le tableau
-  //   const head = [
-  //     ['Matricule', ...Array.from({ length: new Date(selectedYear, selectedMonth, 0).getDate() }, (_, i) => formatDate(new Date(selectedYear, selectedMonth - 1, i + 1)))],
-  //   ];
-  //   const body = uniqueMatricules.map((uniqueMatricule) => {
-  //     const matriculeDates = planningDataFromFetch
-  //       .filter(matriculeData => matriculeData.PERSMATR === uniqueMatricule)
-  //       .map(matriculeData => matriculeData.PLANDATE);
-  //     return [
-  //       uniqueMatricule,
-  //       ...Array.from({ length: new Date(selectedYear, selectedMonth, 0).getDate() }, (_, i) => {
-  //         const currentDate = new Date(selectedYear, selectedMonth - 1, i + 1);
-  //         const formattedDate = currentDate.toISOString().split('T')[0];
-  //         const matriculeDatesFormatted = matriculeDates.map(date => new Date(date).toISOString().split('T')[0]);
-  //         const currentState = matriculeDatesFormatted.includes(formattedDate) ? 'O' : 'N';
-  //         return currentState;
-  //       }),
-  //     ];
-  //   });
-  
-  //   // Ajouter le tableau
-  //   doc.autoTable({
-  //     startY: 80, // Ajouter de l'espace après les informations du client, site et période
-  //     head: head,
-  //     body: body,
-  //     columnStyles: {
-  //       0: { cellWidth: 30 },
-  //     },
-  //     styles: {
-  //       fontSize: 10,
-  //       cellPadding: 2,
-  //       valign: 'middle',
-  //       halign: 'center',
-  //     },
-  //   });
-  
-  //   doc.save('planning.pdf');
-  // };
   function getMonthName(monthNumber) {
     const monthNames = [
         'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -314,19 +253,23 @@ function Home() {
     ];
     return monthNames[monthNumber - 1]; 
 }
+
+  const handlePrint = () => {
+    window.print();
+  };
   
 
   return (
     <>
-      <Header className="header" />
-      <div className='class1'>
-        <hr />
-      </div>
+     <p className='header-title'>Pointage - Cycles par chantier</p>
       <div className='select-container '>
-        <div>
-      <div className='select-wrapper'>
+      <div className="pcvc-container">
+      <p className='pcvc-title'>Critère de recherche</p>
+        <div className='select-w'>
+         <div className='select-pc'>
+          <div className="select-p">
         <label htmlFor='poleSelect'>Pôle</label>
-        <Select
+        <Select className='pole-select'
             id='poleSelect'
             value={selectedPoles}
             onChange={handlePoleChange}
@@ -345,9 +288,9 @@ function Home() {
             ))}
         </Select>
         </div>
-        <div className='select-wrapper'>
+        <div className="select-cl">
           <label htmlFor='clientSelect'>Clients</label>
-        <Select
+        <Select className='cvc-select'
              id='clientSelect'
              value={selectedClientsId}
              onChange={handleClientChange}
@@ -366,9 +309,11 @@ function Home() {
             ))}
         </Select>
         </div>
-        <div className='select-wrapper'>
+        </div>
+        <div className='select-vc'> 
+        <div className="select-v">
           <label htmlFor='villeSelect'>Ville</label>
-        <Select
+        <Select className='cvc-select'
             id='villeSelect'
             value={selectedVilles}
             onChange={handleVilleChange}
@@ -387,9 +332,9 @@ function Home() {
             ))}
         </Select>
         </div>
-        <div className='select-wrapper'>
+          <div className="select-ch">   
           <label htmlFor='siteSelect'>Chantier</label>
-        <Select
+        <Select className='cvc-select'
             id='siteSelect'
             value={selectedSitesId}
             onChange={handleSiteChange}
@@ -409,10 +354,15 @@ function Home() {
         </Select>
         </div>
         </div>
+        </div>
+        </div>
 
-        <div className='select-wrapper'>
+        <div className='period-container'>
+          <p className='period-title'>Période du planning</p>
+          <div className="period-select">
+          
         <label htmlFor='periodSelect'>Période</label>
-        <Select
+        <Select className='select-pe'
             id='periodSelect'
             value={selectedPeriodes}
             onChange={handlePeriodeChange}
@@ -429,15 +379,32 @@ function Home() {
               </Option>
             ))}
         </Select>
-
+        </div>
+        <div className="button-container">
+          <div className="print-container">
+             <button>
+             A
+             </button>
+             <button>
+             B
+             </button>
+             <button onClick={handlePrint}>
+             Imprimer
+             </button>
+          </div>
+          <div className="consolider">
+          <button>
+             Consolider
+          </button>
+          <button>
+             C
+          </button>
+          </div>
+        </div>
 
 
         </div>
-        {/* {selectedPeriodes && selectedClientsId && selectedSitesId && (
-        // <div className="d-flex justify-content-end">
-        //   <button onClick={handlePrint} className="btn btn-primary ml-5">Print PDF</button>
-        // </div>
-        )} */}
+       
       </div>
       
       {isFormVisible && (

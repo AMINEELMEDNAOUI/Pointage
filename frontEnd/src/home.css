@@ -1,201 +1,153 @@
 body {
   font-family: Arial, sans-serif;
-  
     font-family: Arial, sans-serif;
-    margin: 0; /* Retire les marges par défaut */
-    padding: 0; /* Retire les paddings par défaut */
-    overflow: hidden; /* Empêche le défilement */
+    margin: 0; 
+    padding: 0; 
+    overflow: hidden;
+    background-color: #e71818; 
   
-}
-
-.header {
-  background-color: #f8f8f8;
-  padding: 10px;
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-  border-bottom: 1px solid #ccc;
 }
 
 .select-container {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   padding: 20px;
   background-color: #f1f1f1;
   border-bottom: 1px solid #ccc;
+  overflow-x: auto; 
 }
-
-.select-wrapper {
-  display: flex;
-  flex-direction: column;
-  margin-right: 20px;
+.select-w{
+  display:flex ;
+  justify-content: space-between;
+  width: 1000px;
+  border: 1px solid rgb(209, 200, 200);
+  padding: 20px;
+}
+.select-pc{
+  display:grid ;
   
 }
+.select-vc{
+  display:grid ;
+}
+.select-p , .select-cl , .select-v , .select-ch {
+ display: flex;
+ margin-top: 5px;
+ margin-bottom: 5px;
+}
+label[for="poleSelect"] , label[for="clientSelect"] , label[for="villeSelect"] ,label[for="siteSelect"]{
+  color: rgb(58, 143, 208); 
+  font-weight: bold; 
+  font-size: 14px; 
+  margin-right: 80px;
+  width: 20px;
 
-.select-wrapper label {
-  margin-bottom: 5px;
+}
+.pole-select{
+  width: 200px;
+}
+.cvc-select{
+  width:350px;
+}
+.header-title {
+  text-align: center;
+  font-weight: bolder;
+  margin: 0;
+  background-color: #f1f1f1;
+}
+.pcvc-title{
+  margin: 0;
   font-weight: bold;
-  color:rgb(24, 181, 233)
- 
+}
+.period-container{
+  width: 450px
+}
+.button-container{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+.button-container button {
+  border: 1px solid rgb(95, 94, 94) ;
+  background-color: #d8d7d7;
+  border-radius: 5px;
+  margin-right: 7px;
+  
+}
+.period-select{
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid rgb(209, 200, 200);
+  padding: 15px;
+
+}
+.select-pe {
+  width: 300px;
+  margin-right: 30px;
+}
+label[for="periodSelect"] {
+  color:red ;
+  font-weight: bold;
+}
+.period-title{
+  margin:0;
+  font-weight: bolder;
+  color:red ;
+
+}
+.table-container th,td{
+  border :1px solid #a6a4a4 ;
 }
 
-label[for='periodSelect'] {
-  color: red;
+tr:nth-child(even) {
+  background-color: #d2cece;
 }
-
-
-.select-wrapper select {
-  padding: 5px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+tr:nth-child(odd) {
+  background-color: #f1f1f1;
 }
+.table-c{
+  background-color: #f1f1f1;
+  
+}
+.print-button {
+  font-weight: bold;
+  cursor: pointer;
 
+}
+.beach-button{
+  color: rgb(52, 152, 240);
+ cursor: pointer;
+
+}
+.umbrella-button{
+  color: rgb(240, 52, 52);
+ cursor: pointer;
+
+}
+.consolider-button{
+  font-weight: bold;
+ cursor: pointer;
+}
+.falock{
+ color:rgb(176, 176, 5);
+}
+.faPrint{
+  color: rgb(0, 155, 28);
+}
 .table-container {
-  padding: 20px;
-}
-
-table {
+  overflow-x: auto; 
+  overflow-y: auto;
+  max-height: auto; 
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
 }
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
-}
-
-th {
-  background-color: #f2f2f2;
-  font-weight: bold;
-}
-
-.text-green {
-  color: green;
-}
-
-.text-red {
-  color: red;
-}
-
-.update-icon {
-  margin-left: 10px;
-  cursor: pointer;
-  color: #007bff;
-}
-
-.form-container {
-  margin: 20px;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.date {
-  padding: 8px;
+.table-container thead {
+  position: sticky;
+  top: 0;
   background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  z-index: 2;
 }
 
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-}
 
-.button-group button {
-  padding: 10px 20px;
-  font-size: 16px;
-  margin-left: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.button-group .btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
-.button-group .btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.select-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Deux colonnes égales */
-  grid-template-rows: auto auto; /* Deux rangées avec hauteur automatique */
-  gap: 20px; /* Espacement entre les éléments */
-  padding: 20px;
-  background-color: #f1f1f1;
-  border-bottom: 1px solid #ccc;
-}
-
-.select-wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.label[for='periodSelect'] {
-  grid-column: 2; /* Place la période dans la deuxième colonne */
-  grid-row: 1; /* Place la période dans la première rangée */
-  align-self: center; /* Centre verticalement */
-}
-
-.select-wrapper:nth-child(odd) {
-  grid-row: 1; 
-}
-
-.select-wrapper:nth-child(even) {
-  grid-row: 2; /* Place les sélections paires (Client et Chantier) dans la deuxième rangée */
-}
-
-.select-wrapper Select {
-  padding: 5px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: auto; /* Remplit toute la largeur de son conteneur */
-}
-
-.search-icon {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  cursor: pointer;
-  margin-left: 210px;
-  margin-top:45px;;
-}
-
-/* Style de l'icône de recherche elle-même */
-.search-icon svg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-.select-wrapper select {
-  padding: 5px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 10%; /* Remplit toute la largeur de son conteneur */
-  overflow: hidden; /* Masque le contenu dépassant de la zone de sélection */
-}
 
 
 
