@@ -107,6 +107,10 @@ tr:nth-child(odd) {
 }
 .table-c{
   background-color: #f1f1f1;
+  height:100vh;
+  overflow-x: auto; 
+  overflow-y: auto; 
+
   
 }
 .print-button {
@@ -134,10 +138,8 @@ tr:nth-child(odd) {
 .faPrint{
   color: rgb(0, 155, 28);
 }
-.table-container {
-  overflow-x: auto; 
-  overflow-y: auto; 
-  max-height: 520px; /* Définir une hauteur maximale fixe ou en pourcentage */
+.table-container {  
+  max-height: 520px; 
   width: 100%;
 }
 
@@ -157,7 +159,41 @@ table td{
   z-index: 2;
 }
 
+.liste{
+  background-color: white;
+  height: 80px;
+  width: 150px;
+  position: absolute;
+  z-index: 2;
+  border-radius: 5px;
+  box-shadow: 2px 5px 12px 0px rgba(0,0,0,0.49);
+-webkit-box-shadow: 2px 5px 12px 0px rgba(0,0,0,0.49);
+-moz-box-shadow: 2px 5px 12px 0px rgba(0,0,0,0.49);
 
+}
+.tdtable{
+  position: relative;
+}
+.pliste1,.pliste2 {
+  font-size: 18px;
+  font-weight: normal;
+  text-align: left;
+  color:black ;
+  margin: 0;
+  padding-top: 7px;
+  padding-left: 4px;
+  padding-bottom: 7px;
+
+
+}
+.pliste1:hover{
+  background-color: #bdbbbb;
+  cursor: pointer;
+}
+.pliste2:hover{
+  background-color: #bdbbbb;
+  cursor: pointer;
+}
 
 
 

@@ -26,6 +26,9 @@ function Home() {
   const [currentState, setCurrentState] = useState('');
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [matriculeValue, setMatriculeValue] = useState('');
+  const [showListModal,setShowListModal]= useState(false);
+ const [tdKey,setTdKey]= useState(null);
+ const [trKey,setTrKey]= useState(null);
   
   useEffect(() => {
     fetch(`http://localhost:8081/periodes`)
@@ -197,7 +200,21 @@ function Home() {
         return '';
     }
   };
+
+  const handleRightClick=(e,i,index)=> {
+    e.preventDefault();
+    setTdKey(i);
+    setTrKey(index);
+      setShowListModal(true); 
+    
+     
+  }
+  const handleClickOutside=()=>{
+    setShowListModal(false);
+  }
+  document.addEventListener('click', handleClickOutside);
   
+
  
   
 
@@ -382,8 +399,11 @@ function Home() {
                 {entry.LIBEABR}
                   </td>
                 {Array.from({ length: daysInMonth }, (_, i) => (
-                  <td key={i + 1} style={{ textAlign: 'center', color: getColor(entry.values[i]) , fontWeight:'bolder   ' }}>
+                  <td key={i + 1} style={{ textAlign: 'center', color: getColor(entry.values[i]) , fontWeight:'bolder' }} onContextMenu={(e)=>handleRightClick(e,i,index)} className='tdtable'>
                   {getText(entry.values[i])}
+                  {showListModal && tdKey===i && trKey===index ? <div  className="liste"><p className='pliste1'>Modifier Horaire </p> <p className='pliste2'>Ajouter abscence</p></div> : ''}
+                   
+
                   </td>
                   
                 ))}
@@ -394,6 +414,7 @@ function Home() {
       </div>
       </div>
       )}
+  
     </>
   );
 }
