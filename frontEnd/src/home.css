@@ -136,10 +136,20 @@ tr:nth-child(odd) {
 }
 .table-container {
   overflow-x: auto; 
-  overflow-y: auto;
-  max-height: auto; 
+  overflow-y: auto; 
+  max-height: 520px; /* Définir une hauteur maximale fixe ou en pourcentage */
   width: 100%;
 }
+
+table {
+
+  table-layout: fixed; 
+  
+}
+table td{
+  border :1px solid #a6a4a4 ;
+}
+
 .table-container thead {
   position: sticky;
   top: 0;

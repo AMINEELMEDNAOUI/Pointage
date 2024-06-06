@@ -148,6 +148,60 @@ function Home() {
     return dayNames[dayNumber ];
   };
 
+  const uniqueValuesArray = [];
+
+  salaries.forEach(salary => {
+      const isSameGroup = (item) => 
+          item.PERSMATR === salary.PERSMATR && 
+          item.PERSNOPE === salary.PERSNOPE &&
+          item.PERSPRPE === salary.PERSPRPE &&
+          item.LIBEABR === salary.LIBEABR;
+  
+      let entry = uniqueValuesArray.find(isSameGroup);
+      
+      if (!entry) {
+          entry = {
+              PERSMATR: salary.PERSMATR,
+              PERSNOPE: salary.PERSNOPE,
+              PERSPRPE: salary.PERSPRPE,
+              LIBEABR: salary.LIBEABR,
+              values: []
+          };
+          uniqueValuesArray.push(entry);
+      }
+      entry.values.push(salary.PLANPAJO);
+  });
+  console.log(uniqueValuesArray);
+  const getColor = (value) => {
+    switch (value) {
+      case 1:
+        return 'blue';
+      case 2:
+        return 'Darkslategray';
+      case 3:
+        return 'red';
+      default:
+        return 'black';
+    }
+  };
+  
+  const getText = (value) => {
+    switch (value) {
+      case 1:
+        return 'J';
+      case 2:
+        return 'N';
+      case 3:
+        return 'R';
+      default:
+        return '';
+    }
+  };
+  
+ 
+  
+
+
   return (
     <>
       <p className='header-title'>Pointage - Cycles par chantier</p>
@@ -317,13 +371,19 @@ function Home() {
     ))}
             </tr>
           </thead>
+          
           <tbody>
-            {salaries.map((data, index) => (
-              <tr key={index}>
-                <td style={{fontSize:'15px'}}>{data.PERSMATR}/-{data.PERSNOPE} {data.PERSPRPE}</td>
+                {uniqueValuesArray.map((entry, index) => (
+                  <tr key={index}>
+                    <td style={{ fontSize: '15px' }}>
+                      {entry.PERSMATR}/-{entry.PERSNOPE} {entry.PERSPRPE}
+                    </td>
+                <td style={{textAlign:'center'}}>
+                {entry.LIBEABR}
+                  </td>
                 {Array.from({ length: daysInMonth }, (_, i) => (
-                  <td key={i + 1}>
-                    {data[`D${(i + 1).toString().padStart(2, '0')}`]}
+                  <td key={i + 1} style={{ textAlign: 'center', color: getColor(entry.values[i]) , fontWeight:'bolder   ' }}>
+                  {getText(entry.values[i])}
                   </td>
                   
                 ))}
