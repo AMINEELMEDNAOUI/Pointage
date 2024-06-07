@@ -159,7 +159,7 @@ table td{
   z-index: 2;
 }
 
-.liste{
+.liste {
   background-color: white;
   height: 80px;
   width: 150px;
@@ -174,7 +174,7 @@ table td{
 .tdtable{
   position: relative;
 }
-.pliste1,.pliste2 {
+.pliste1,.pliste2  {
   font-size: 18px;
   font-weight: normal;
   text-align: left;
@@ -194,6 +194,92 @@ table td{
   background-color: #bdbbbb;
   cursor: pointer;
 }
+.listehor{
+  background-color: #e3e2e2;
+  height: 300px;
+  width: 600px;
+  position: absolute;
+  z-index: 3;
+  border-radius: 5px;
+  box-shadow: 2px 5px 12px 0px rgba(0,0,0,0.49);
+-webkit-box-shadow: 2px 5px 12px 0px rgba(0,0,0,0.49);
+-moz-box-shadow: 2px 5px 12px 0px rgba(0,0,0,0.49);
+   top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+
+}
+.h1listehor{
+  border:1px solid #6f6d6d;
+  text-align: center;
+  margin-top: 10px;
+  margin-left:5px;
+  margin-right:5px;
+  padding-bottom: 8px;
+  margin-bottom: 25px;
+  color:red;
+
+}
+.psal ,.pperi, .phor{
+  font-weight: bolder;
+  margin:0;
+  color: #757474;
+}
+.selecthor{
+  margin-top: 20px;
+  margin-left:20px;
+  width: auto;
+  border-radius: 5px;
+  height: 33px;
+  cursor: pointer;
+  font-weight: bolder;
+
+}
+
+.selecthor:hover{
+  background-color: #d8d7d7;
+}
+
+
+.buttonvhor,.buttonahor{
+  border-radius: 5px;
+
+}
+.buttonvhor{
+  color: green;
+  font-weight: bolder;
+  
+}
+.buttonahor{
+  color:red;
+  font-weight: bolder;
+  margin-left: 6px; 
+}
+.horbutt{
+  position: absolute;
+  top:87%;
+  left:68%;
+}
+label[for="horaireSelect"] {
+  font-weight: bold;
+  color: #757474;
+}
+.spansal,.spanperi{
+  color: #000801;
+}
+.optionj{
+ color:blue;
+ font-weight: bold;
+}
+.optionn{
+  color:Darkslategray;
+  font-weight: bold;
+ }
+ .optionr{
+  color:red;
+  font-weight: bold;
+ }
 
 
 

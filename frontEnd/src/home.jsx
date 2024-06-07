@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect ,useRef } from 'react';
 import './home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPrint } from '@fortawesome/free-solid-svg-icons';
@@ -6,8 +6,12 @@ import { faWater } from '@fortawesome/free-solid-svg-icons';
 import { faUmbrellaBeach } from '@fortawesome/free-solid-svg-icons';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faTimes } from '@fortawesome/free-solid-svg-icons'
 import { Select } from 'antd';
 const { Option } = Select;
+
+
 
 function Home() {
   const [clients, setClients] = useState([]);
@@ -29,6 +33,14 @@ function Home() {
   const [showListModal,setShowListModal]= useState(false);
  const [tdKey,setTdKey]= useState(null);
  const [trKey,setTrKey]= useState(null);
+ const [showModalHoraire,setShowModalHoraire]=useState(false);
+ const listModalRef = useRef(null);
+const horaireModalRef = useRef(null);
+const [selectedHoraire,setSelectedHoraire]=useState('');
+const [selectedSalary, setSelectedSalary] = useState(null);
+const [selectedDayIndex, setSelectedDayIndex] = useState(null);
+const [selectedValue, setSelectedValue] = useState(null);
+
   
   useEffect(() => {
     fetch(`http://localhost:8081/periodes`)
@@ -96,6 +108,23 @@ function Home() {
     }
   }, [selectedPeriodes, selectedPoles, selectedClientsId, selectedSitesId]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (listModalRef.current && !listModalRef.current.contains(event.target)) {
+        setShowListModal(false);
+      }
+      if (horaireModalRef.current && !horaireModalRef.current.contains(event.target)) {
+        setShowModalHoraire(false);
+      }
+    };
+  
+    document.addEventListener('mousedown', handleClickOutside);
+  
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
 
   const handleClientChange = value => {
     setSelectedClientsId(value);
@@ -200,21 +229,43 @@ function Home() {
         return '';
     }
   };
+  const handleCancel = () => {
+    setShowModalHoraire(false); 
+  };
 
-  const handleRightClick=(e,i,index)=> {
+  const handleRightClick=(e,i,index,v)=> {
     e.preventDefault();
     setTdKey(i);
     setTrKey(index);
-      setShowListModal(true); 
+    setShowListModal(true); 
+    setSelectedSalary(uniqueValuesArray[index]);
+    setSelectedDayIndex(i);
+    setSelectedValue(v);
+
     
      
   }
-  const handleClickOutside=()=>{
-    setShowListModal(false);
-  }
-  document.addEventListener('click', handleClickOutside);
-  
 
+  const handleChangeHoraire=(e)=> {
+    e.preventDefault();
+    setShowListModal(false)
+    setShowModalHoraire(true); 
+    
+     
+  }
+  const handleChangeSHoraire=(e)=>{
+    setSelectedHoraire(e.target.value);
+    handleCellClick(e, selectedSalary,selectedDayIndex,selectedValue );
+  }
+  const handleCellClick = (e, salary, dayIndex ,v) => {
+    const { PERSMATR, PERSNOPE, PERSPRPE } = salary;
+    const employeeId = `${PERSMATR}/-${PERSNOPE} ${PERSPRPE}`;
+    const selectedDay = dayIndex + 1; 
+    v = e.target.textContent; 
+    
+  };
+  
+ const [mois,annee]=selectedPeriodes.split('-');
  
   
 
@@ -344,7 +395,6 @@ function Home() {
             </Select>
           </div>
          
-
           <div className="button-container">
             <div className="print-container">
               <button className='beach-button'>
@@ -399,9 +449,9 @@ function Home() {
                 {entry.LIBEABR}
                   </td>
                 {Array.from({ length: daysInMonth }, (_, i) => (
-                  <td key={i + 1} style={{ textAlign: 'center', color: getColor(entry.values[i]) , fontWeight:'bolder' }} onContextMenu={(e)=>handleRightClick(e,i,index)} className='tdtable'>
+                  <td key={i + 1} style={{ textAlign: 'center', color: getColor(entry.values[i]) , fontWeight:'bolder' }} onContextMenu={(e)=>handleRightClick(e,i,index,entry.values[i])} className='tdtable'  onClick={(e) => handleCellClick(e, entry, i,v)}>
                   {getText(entry.values[i])}
-                  {showListModal && tdKey===i && trKey===index ? <div  className="liste"><p className='pliste1'>Modifier Horaire </p> <p className='pliste2'>Ajouter abscence</p></div> : ''}
+                  {showListModal && tdKey===i && trKey===index ? <div  className="liste" ref={listModalRef}><p className='pliste1' onClick={(e)=>handleChangeHoraire(e)} >Modifier Horaire </p> <p className='pliste2'>Ajouter abscence</p></div> : ''}
                    
 
                   </td>
@@ -412,9 +462,16 @@ function Home() {
           </tbody>
         </table>
       </div>
+      {showModalHoraire ? <div className='listehor' ref={horaireModalRef}>
+        <h1 className='h1listehor'>Changement d'horaire</h1>
+        <p className='psal'>Salarié : <span className='spansal'>{`${selectedSalary.PERSMATR}/-${selectedSalary.PERSNOPE} ${selectedSalary.PERSPRPE}`}</span></p><p className='pperi'>Période : <span className='spanperi'>{selectedDayIndex+1} {getMonthName(mois)} {annee}</span></p>
+        <p className='phor'>Horaire actuelle : <span style={{ color:getColor(selectedValue)}}>{getText(selectedValue)}</span></p>
+        <div><label htmlFor='horaireSelect'>Nouvel Horaire :</label><select className='selecthor'id='horaireSelect' value={selectedHoraire} onChange={handleChangeSHoraire}><option value='' disabled hidden>Sélectionner nouvel Horaire </option>
+        <option className='optionj' value={1}>J</option><option className='optionn' value={2}>N</option><option className='optionr' value={3}>R</option>
+        </select></div><div className='horbutt'><button className='buttonvhor'>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonahor' onClick={handleCancel}>Annuler <FontAwesomeIcon icon={faTimes} /></button></div></div> : ''}
       </div>
       )}
-  
+    
     </>
   );
 }
