@@ -7,7 +7,7 @@ import { faUmbrellaBeach } from '@fortawesome/free-solid-svg-icons';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
-import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faTimes ,faExpand, faCompress ,faClock } from '@fortawesome/free-solid-svg-icons';
 import { Select } from 'antd';
 const { Option } = Select;
 
@@ -34,12 +34,15 @@ function Home() {
  const [tdKey,setTdKey]= useState(null);
  const [trKey,setTrKey]= useState(null);
  const [showModalHoraire,setShowModalHoraire]=useState(false);
+ const [showModalAbsence,setShowModalAbsence]=useState(false)
  const listModalRef = useRef(null);
 const horaireModalRef = useRef(null);
+const absenceModalRef = useRef(null);
 const [selectedHoraire,setSelectedHoraire]=useState('');
 const [selectedSalary, setSelectedSalary] = useState(null);
 const [selectedDayIndex, setSelectedDayIndex] = useState(null);
 const [selectedValue, setSelectedValue] = useState(null);
+const [isMaximized, setIsMaximized] = useState(false);
 
   
   useEffect(() => {
@@ -116,6 +119,9 @@ const [selectedValue, setSelectedValue] = useState(null);
       if (horaireModalRef.current && !horaireModalRef.current.contains(event.target)) {
         setShowModalHoraire(false);
       }
+      if (absenceModalRef.current && !absenceModalRef.current.contains(event.target)) {
+        setShowModalAbsence(false);
+      }
     };
   
     document.addEventListener('mousedown', handleClickOutside);
@@ -156,9 +162,72 @@ const [selectedValue, setSelectedValue] = useState(null);
     setSelectedVilles('');
   };
 
+  const handleMaximize = () => {
+    setIsMaximized(!isMaximized);
+  };
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleFormSubmit = event => {
+    event.preventDefault();
+    const url = 'http://localhost:8081/planning';
+    
+   
+    const [selectedMonth, selectedYear] = selectedPeriodes.split('-');
+    const [TIRID, CNAME] = selectedClientsId.split('-');
+      const [ADRID, SNAME] = selectedSitesId.split('-');
+      const [pole, npole] = selectedPoles.split('-');
+   
+    const selectedDay = (parseInt(selectedDayIndex) + 1).toString().padStart(2, '0');
+    
+    
+    const formattedDate = `${selectedYear}-${selectedMonth.padStart(2, '0')}-${selectedDay}`;
+    
+    
+    const requestBody = {
+      client: TIRID,
+      site: ADRID,
+      matricule:selectedSalary.PERSMATR,
+      pole:pole,
+      horaire:selectedHoraire,
+      date: formattedDate
+    };
+    
+    
+    fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log(data);
+      fetchUpdatedData(); 
+    })
+    .catch(err => console.log(err));
+    
+    setShowModalHoraire(false);
+};
+
+
+  
+  const fetchUpdatedData = () => {
+    const [TIRID, CNAME] = selectedClientsId.split('-');
+    const [ADRID, SNAME] = selectedSitesId.split('-');
+    const [MONTH, YEAR] = selectedPeriodes.split('-');
+    const [pole, npole] = selectedPoles.split('-');
+     const url=`http://localhost:8081/planning?TIRID=${TIRID}&ADRID=${ADRID}&MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}`;
+  
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        setSalaries(data); 
+      })
+      .catch(err => console.log(err));
   };
 
   const getDaysInMonth = (month, year) => {
@@ -203,7 +272,7 @@ const [selectedValue, setSelectedValue] = useState(null);
       }
       entry.values.push(salary.PLANPAJO);
   });
-  console.log(uniqueValuesArray);
+
   const getColor = (value) => {
     switch (value) {
       case 1:
@@ -249,9 +318,13 @@ const [selectedValue, setSelectedValue] = useState(null);
   const handleChangeHoraire=(e)=> {
     e.preventDefault();
     setShowListModal(false)
-    setShowModalHoraire(true); 
-    
-     
+    setShowModalHoraire(true);   
+  }
+  const handleAbsence=(e)=> {
+    e.preventDefault();
+    setShowListModal(false)
+    setShowModalAbsence(true)
+       
   }
   const handleChangeSHoraire=(e)=>{
     setSelectedHoraire(e.target.value);
@@ -266,10 +339,12 @@ const [selectedValue, setSelectedValue] = useState(null);
   };
   
  const [mois,annee]=selectedPeriodes.split('-');
- 
-  
-
-
+ const contentStyle = isMaximized ? { fontSize: '30px',  } : {};
+ const contentStyleSelect = isMaximized ? { width: '500px',height:'50px',fontSize:'30px' } : {};
+ const contentStyleButt = isMaximized ? { width: '140px',height:'50px',fontSize:'25px' ,marginLeft:'13px' } : {};
+ const contentStyleButtx = isMaximized ? { fontSize:'30px' } : {};
+ const contentStylep = isMaximized ? { fontSize:'19px' ,marginRight:'680px' } : {};
+ const contentStylediv = isMaximized ? { height:'350px' } : {};
   return (
     <>
       <p className='header-title'>Pointage - Cycles par chantier</p>
@@ -451,7 +526,7 @@ const [selectedValue, setSelectedValue] = useState(null);
                 {Array.from({ length: daysInMonth }, (_, i) => (
                   <td key={i + 1} style={{ textAlign: 'center', color: getColor(entry.values[i]) , fontWeight:'bolder' }} onContextMenu={(e)=>handleRightClick(e,i,index,entry.values[i])} className='tdtable'  onClick={(e) => handleCellClick(e, entry, i,v)}>
                   {getText(entry.values[i])}
-                  {showListModal && tdKey===i && trKey===index ? <div  className="liste" ref={listModalRef}><p className='pliste1' onClick={(e)=>handleChangeHoraire(e)} >Modifier Horaire </p> <p className='pliste2'>Ajouter abscence</p></div> : ''}
+                  {showListModal && tdKey===i && trKey===index ? <div  className="liste" ref={listModalRef}><p className='pliste1' onClick={(e)=>handleChangeHoraire(e)} >Modifier Horaire </p> <p className='pliste2' onClick={(e)=>handleAbsence(e)}>Ajouter abscence</p></div> : ''}
                    
 
                   </td>
@@ -462,13 +537,23 @@ const [selectedValue, setSelectedValue] = useState(null);
           </tbody>
         </table>
       </div>
-      {showModalHoraire ? <div className='listehor' ref={horaireModalRef}>
-        <h1 className='h1listehor'>Changement d'horaire</h1>
-        <p className='psal'>Salarié : <span className='spansal'>{`${selectedSalary.PERSMATR}/-${selectedSalary.PERSNOPE} ${selectedSalary.PERSPRPE}`}</span></p><p className='pperi'>Période : <span className='spanperi'>{selectedDayIndex+1} {getMonthName(mois)} {annee}</span></p>
-        <p className='phor'>Horaire actuelle : <span style={{ color:getColor(selectedValue)}}>{getText(selectedValue)}</span></p>
-        <div><label htmlFor='horaireSelect'>Nouvel Horaire :</label><select className='selecthor'id='horaireSelect' value={selectedHoraire} onChange={handleChangeSHoraire}><option value='' disabled hidden>Sélectionner nouvel Horaire </option>
+      {showModalHoraire ? <div className={`listehor ${isMaximized ? 'maximized' : ''}`} ref={horaireModalRef}>
+      <div className='modal-header'>
+        <p className="titrehor" style={contentStylep}>Fiche - Gestion des Horaires</p>
+          <FontAwesomeIcon icon={isMaximized ? faCompress : faExpand} className='modal-maximize' onClick={handleMaximize} style={contentStyleButtx}/>
+          <FontAwesomeIcon icon={faTimes} className='modal-close' onClick={handleCancel} style={contentStyleButtx} />
+        </div>
+        
+        <h1 className='h1listehor'>Changement d'horaire <FontAwesomeIcon icon={faClock} /></h1>
+        <div className='hordiv' style={contentStylediv}>
+        <p className='psal' style={contentStyle}>Salarié : <span className='spansal' style={contentStyle}>{`${selectedSalary.PERSMATR}/-${selectedSalary.PERSNOPE} ${selectedSalary.PERSPRPE}`}</span></p><p className='pperi' style={contentStyle}>Période : <span className='spanperi' style={contentStyle}>{selectedDayIndex+1} {getMonthName(mois)} {annee}</span></p>
+        <p className='phor' style={contentStyle}>Horaire actuelle : <span style={{ color:getColor(selectedValue)}}>{getText(selectedValue)}</span></p>
+        <div><label htmlFor='horaireSelect' style={contentStyle}>Nouvel Horaire :</label><select className='selecthor'id='horaireSelect' value={selectedHoraire} onChange={handleChangeSHoraire} style={contentStyleSelect}><option value='' disabled hidden>Sélectionner nouvel Horaire </option>
         <option className='optionj' value={1}>J</option><option className='optionn' value={2}>N</option><option className='optionr' value={3}>R</option>
-        </select></div><div className='horbutt'><button className='buttonvhor'>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonahor' onClick={handleCancel}>Annuler <FontAwesomeIcon icon={faTimes} /></button></div></div> : ''}
+        </select></div><div className='horbutt' ><button className='buttonvhor' style={contentStyleButt} onClick={handleFormSubmit}>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonahor' style={contentStyleButt} onClick={handleCancel}>Fermer <FontAwesomeIcon icon={faTimes} /></button></div></div></div> : ''}
+        
+        {showModalAbsence ? <div className='listeabsence' ref={absenceModalRef}>
+        <div className='absdiv1'><p className='abspdvi1'>Type d'évènement</p></div><div className='absdiv2'></div></div> : ''}
       </div>
       )}
     

@@ -88,18 +88,28 @@ app.get('/planning', (req, res) => {
     })
 })
 
-app.get('/planning2', (req, res) => {
-    const clientId = req.query.TIRID; 
-    const siteId = req.query.ADRID; 
-    const MONTH =req.query.MONTH ;
-    const YEAR = req.query.YEAR ;
-    const pole = req.query.pole;
-    const sql = `SELECT DISTINCT LIBEABR FROM EXT_RHDETASTAT WHERE IDDETASTAT IN (SELECT STATCLAS FROM EXT_RHPLANNIN WHERE TIRID='${clientId}' AND ADRID='${siteId}' AND MONTH(PLANDATE)='${MONTH}' AND YEAR(PLANDATE)='${YEAR}' AND STATNATURE='${pole}')`;
-    db.query(sql, (err, data) => {
-        if (err) return res.json(err);
-        return res.json(data);
-    })
-})
+app.put('/planning', (req, res) => {
+    const { client, site, matricule, pole, date, horaire } = req.body;
+  
+    if (!client || !site || !matricule || !pole || !date || !horaire) {
+      return res.status(400).json({ error: 'Tous les champs sont obligatoires.' });
+    }
+  
+    const query = `
+      UPDATE EXT_RHPLANNIN
+      SET PLANPAJO = ?
+      WHERE TIRID = ? AND ADRID = ? AND PERSMATR = ? AND STATNATURE = ? AND PLANDATE = ?
+    `;
+    const values = [horaire, client, site, matricule, pole, date];
+  
+    db.query(query, values, (err, results) => {
+      if (err) {
+        console.error('Erreur lors de la mise à jour du planning :', err);
+        return res.status(500).json({ error: 'Erreur lors de la mise à jour du planning.' });
+      }
+      res.json({ message: 'Planning mis à jour avec succès.', results });
+    });
+  });
 
 app.delete('/planning', (req, res) => {
     const { client, site, matricule, date } = req.body;
