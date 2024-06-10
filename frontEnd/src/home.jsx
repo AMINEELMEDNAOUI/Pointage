@@ -43,8 +43,17 @@ const [selectedSalary, setSelectedSalary] = useState(null);
 const [selectedDayIndex, setSelectedDayIndex] = useState(null);
 const [selectedValue, setSelectedValue] = useState(null);
 const [isMaximized, setIsMaximized] = useState(false);
+const [startDate, setStartDate] = useState('');
+const [endDate, setEndDate] = useState('');
+const [allDay, setAllDay] = useState(false);
+  const [startTime, setStartTime] = useState('07:00');
+  const [endTime, setEndTime] = useState('19:00');
+  const [hours, setHours] = useState('12,00');
+  const [remplace, setRemplace] = useState(false);
+  const [natuabs, setNatuabs] = useState([]);
+  const [selectedNatuabs, setSelectedNatuabs] = useState('');
 
-  
+
   useEffect(() => {
     fetch(`http://localhost:8081/periodes`)
       .then(res => res.json())
@@ -110,6 +119,13 @@ const [isMaximized, setIsMaximized] = useState(false);
         .catch(err => console.log(err));
     }
   }, [selectedPeriodes, selectedPoles, selectedClientsId, selectedSitesId]);
+  
+  useEffect(() => {
+    fetch(`http://localhost:8081/natuabs`)
+      .then(res => res.json())
+      .then(data => setNatuabs(data))
+      .catch(err => console.log(err));
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -169,6 +185,28 @@ const [isMaximized, setIsMaximized] = useState(false);
   const handlePrint = () => {
     window.print();
   };
+  const handleCheckboxChange = () => {
+    setAllDay(!allDay);
+  };
+  const handleCheckboxChange1 = () => {
+    setRemplace(!remplace);
+  };
+  const handleChangeNatuabs = (event) => {
+    setSelectedNatuabs(event.target.value);
+  };
+
+  useEffect(() => {
+    if (!allDay) {
+      const start = new Date(`1970-01-01T${startTime}:00`);
+      const end = new Date(`1970-01-01T${endTime}:00`);
+      const diff = (end - start) / (1000 * 60 * 60);
+      setHours(diff.toFixed(2).replace('.', ','));
+    } else {
+      setStartTime('07:00');
+      setEndTime('19:00');
+      setHours('12,00');
+    }
+  }, [startTime, endTime, allDay]);
 
   const handleFormSubmit = event => {
     event.preventDefault();
@@ -299,7 +337,8 @@ const [isMaximized, setIsMaximized] = useState(false);
     }
   };
   const handleCancel = () => {
-    setShowModalHoraire(false); 
+    setShowModalHoraire(false);
+    setShowModalAbsence(false); 
   };
 
   const handleRightClick=(e,i,index,v)=> {
@@ -338,12 +377,18 @@ const [isMaximized, setIsMaximized] = useState(false);
     
   };
   
- const [mois,annee]=selectedPeriodes.split('-');
+  const [mois,annee]=selectedPeriodes.split('-');
+ useEffect(() => {
+  
+  const initialDate = `${annee}-${String(mois).padStart(2, '0')}-${String(selectedDayIndex + 1).padStart(2, '0')}`;
+  setStartDate(initialDate);
+}, [selectedPeriodes, mois, annee, selectedDayIndex]);
+
  const contentStyle = isMaximized ? { fontSize: '30px',  } : {};
  const contentStyleSelect = isMaximized ? { width: '500px',height:'50px',fontSize:'30px' } : {};
- const contentStyleButt = isMaximized ? { width: '140px',height:'50px',fontSize:'25px' ,marginLeft:'13px' } : {};
+ const contentStyleButt = isMaximized ? { width: '140px',height:'45px',fontSize:'25px' ,marginLeft:'13px' } : {};
  const contentStyleButtx = isMaximized ? { fontSize:'30px' } : {};
- const contentStylep = isMaximized ? { fontSize:'19px' ,marginRight:'680px' } : {};
+ const contentStylep = isMaximized ? { fontSize:'22px' ,marginRight:'625px' } : {};
  const contentStylediv = isMaximized ? { height:'350px' } : {};
   return (
     <>
@@ -406,7 +451,7 @@ const [isMaximized, setIsMaximized] = useState(false);
                   id='villeSelect'
                   value={selectedVilles}
                   onChange={handleVilleChange}
-                  disabled={!selectedSitesId}
+                  disabled={!selectedClientsId}
                   showSearch
                   filterOption={(input, option) =>
                     typeof option.children === 'string' &&
@@ -553,7 +598,168 @@ const [isMaximized, setIsMaximized] = useState(false);
         </select></div><div className='horbutt' ><button className='buttonvhor' style={contentStyleButt} onClick={handleFormSubmit}>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonahor' style={contentStyleButt} onClick={handleCancel}>Fermer <FontAwesomeIcon icon={faTimes} /></button></div></div></div> : ''}
         
         {showModalAbsence ? <div className='listeabsence' ref={absenceModalRef}>
-        <div className='absdiv1'><p className='abspdvi1'>Type d'évènement</p></div><div className='absdiv2'></div></div> : ''}
+        <div className='modal-header'> 
+        <p className="titreabs" style={contentStylep}>Fiche - Evènements</p>
+          <FontAwesomeIcon icon={isMaximized ? faCompress : faExpand} className='modal-maximize' onClick={handleMaximize} style={contentStyleButtx}/>
+          <FontAwesomeIcon icon={faTimes} className='modal-close' onClick={handleCancel} style={contentStyleButtx} />
+        </div>
+        <div className='absdibcont'>
+        <div className='absdiv1'><p className='abspdvi1'>Type d'évènement</p>
+        <div className="typeevcont">
+        <div className='typeev'>
+          <p className='modalpperi'>Période</p> <span className='spanperi2'>{selectedDayIndex+1} {getMonthName(mois)} {annee}</span>
+          </div>
+          <div className='typeev2'>
+          <label htmlFor='codeabsSelect'  className='modalpcabs'>Code absence </label><select className='selectabs'id='absSelect' value={selectedNatuabs} onChange={handleChangeNatuabs} ><option value='' disabled hidden className='optionabsdis'> selectionner code absence </option>
+          {natuabs.map((abs, index) => (
+          <option 
+            key={index}  
+            value={`${abs.NAABCODE}-${abs.NATUDESI}-${abs.NATUABRE}`}
+          >
+            {abs.NATUDESI}
+          </option>
+        ))}
+        </select>
+          </div>
+          <div className='typeev3'>
+          <label htmlFor='effetSelect'  className='modalpeff'>Effet </label><select className='selecteffet'id='effetSelect' value={selectedHoraire} onChange={handleChangeSHoraire} ><option value='' disabled hidden className='optioneffdis'> selectionner effet </option>
+        <option className='optionj' value={1}>J</option><option className='optionn' value={2}>N</option><option className='optionr' value={3}>R</option>
+        </select>
+
+
+          </div>
+          </div>
+          
+          <p className='pintev'>Interval - Evènement </p>
+          <div className='intev'>
+          <div className='divstd'>
+        <label className='labeldd'>Date début </label>
+        <input className='startdate'
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+      </div>
+      <div className='divend'>
+        <label className='labeldf'>Date fin </label>
+        <input className='enddate'
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
+      </div>
+      <div className='eventcnc'>
+      <label className='labelev'>
+        <input className='inpev'
+          type="checkbox"
+          checked={allDay}
+          onChange={handleCheckboxChange}
+        />
+        Evènement concerne toute la journée
+      </label>
+      <div className='stentime'>
+        <label>
+          <div className='pinst'>
+         <p className='pde'> De </p>
+          <input className='starttime'
+            type="time"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            disabled={allDay}
+          />
+          </div>
+        </label>
+        
+       
+        <label>
+        <div className="pinend">
+        <p className='pa'> à </p>
+          <input className='endtime'
+            type="time"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            disabled={allDay}
+          />
+          </div>
+        </label>
+      </div>
+      <div className='divnbrhr'>
+        <p className='pnbrhr'>Nbre. Heure</p>
+        <input className='innbrh'
+          type="text"
+          value={hours}
+          readOnly
+          disabled={allDay}
+        />
+      </div>
+      </div>
+      <div className='avecremp'>
+      <label className='labelev2'>
+        <input className='inpev2'
+          type="checkbox"
+          checked={remplace}
+          onChange={handleCheckboxChange1}
+        />
+        Evènement avec remplacement
+      </label>
+      </div>
+      </div>
+        </div>
+        <div className='absdiv2'>  
+        <p className='plists'>Liste des salariés disponibles </p>
+        <div className='absdiv3'>
+         <p className='typt'>Type de traitement </p>
+         <div className='divtypt'>
+
+         <div className='check1'>
+        <div className='checkbox1'>
+          <label className='lcheck1'>
+            <input className='incheck1'
+              type="radio"
+             
+            />
+            Saisie manuel du matricule 
+          </label>
+        </div>
+        <div className='checkbox2'>
+          <label className='lcheck2'>
+            <input className='incheck2'
+              type="radio"
+              
+            />
+            Disponibilité dans le même pôle
+          </label>
+        </div>
+      </div >
+      <div className='check2'>
+        <div className='checkbox3'>
+          <label className='lcheck3'>
+            <input className='incheck3'
+              type="radio"
+              
+            />
+            Disponibilité dans le même chantier 
+          </label>
+        </div>
+        <div className='checkbox4'>
+          <label className='lcheck4'>
+            <input className='incheck4'
+              type="radio"
+              
+            />
+            Toutes les Disponibilités
+          </label>
+        </div>
+      </div>
+         </div>
+
+
+        </div>
+        </div> 
+        
+        
+        </div>
+        </div> : ''}
       </div>
       )}
     

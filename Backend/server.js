@@ -28,6 +28,7 @@ app.get('/periodes', (req, res) => {
     });
 });
 
+
 app.get('/clients',(req,res)=>{
     const MONTH =req.query.MONTH ;
     const YEAR = req.query.YEAR ;
@@ -87,6 +88,13 @@ app.get('/planning', (req, res) => {
         return res.json(data);
     })
 })
+app.get('/natuabs', (req, res) => {
+    const sql = `SELECT NAABCODE , NATUDESI ,NATUABRE FROM EXT_RHNATUABSE`;
+    db.query(sql, (err, data) => {
+        if (err) return res.json(err);
+        return res.json(data);
+    });
+});
 
 app.put('/planning', (req, res) => {
     const { client, site, matricule, pole, date, horaire } = req.body;
