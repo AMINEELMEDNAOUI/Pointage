@@ -52,6 +52,12 @@ const [allDay, setAllDay] = useState(false);
   const [remplace, setRemplace] = useState(false);
   const [natuabs, setNatuabs] = useState([]);
   const [selectedNatuabs, setSelectedNatuabs] = useState('');
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedEffet, setSelectedEffet] = useState('');
+  const [salariesDisp, setSalariesDisp] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const inputRef = useRef(null);
 
 
   useEffect(() => {
@@ -128,6 +134,13 @@ const [allDay, setAllDay] = useState(false);
   }, []);
 
   useEffect(() => {
+    fetch(`http://localhost:8081/salariesdisp`)
+      .then(res => res.json())
+      .then(data => setSalariesDisp(data))
+      .catch(err => console.log(err));
+  }, []);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (listModalRef.current && !listModalRef.current.contains(event.target)) {
         setShowListModal(false);
@@ -193,6 +206,19 @@ const [allDay, setAllDay] = useState(false);
   };
   const handleChangeNatuabs = (event) => {
     setSelectedNatuabs(event.target.value);
+  };
+  const handleChangeEffet = (event) => {
+    setSelectedEffet(event.target.value);
+  };
+  const handleRadioClick = (option) => {
+    if (selectedOption === option) {
+      setSelectedOption(null); 
+    } else {
+      setSelectedOption(option); 
+    }
+    if (option === 'manualEntry' && inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   useEffect(() => {
@@ -353,6 +379,18 @@ const [allDay, setAllDay] = useState(false);
     
      
   }
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+  const filteredSalaries = salariesDisp.filter((salarie) => {
+    const searchTermLowerCase = searchTerm.toLowerCase();
+    return (
+      salarie.PERSMATR.toLowerCase().includes(searchTermLowerCase) ||
+      salarie.PERSNOPE.toLowerCase().includes(searchTermLowerCase) ||
+      salarie.PERSPRPE.toLowerCase().includes(searchTermLowerCase) ||
+      salarie.PERSNCIN.toLowerCase().includes(searchTermLowerCase)
+    );
+  });
 
   const handleChangeHoraire=(e)=> {
     e.preventDefault();
@@ -375,6 +413,13 @@ const [allDay, setAllDay] = useState(false);
     const selectedDay = dayIndex + 1; 
     v = e.target.textContent; 
     
+  };
+  const handleRowClick = (salarie) => {
+    if (selectedEmployee === salarie) {
+      setSelectedEmployee(null);
+    } else {
+      setSelectedEmployee(salarie);
+    }
   };
   
   const [mois,annee]=selectedPeriodes.split('-');
@@ -571,7 +616,7 @@ const [allDay, setAllDay] = useState(false);
                 {Array.from({ length: daysInMonth }, (_, i) => (
                   <td key={i + 1} style={{ textAlign: 'center', color: getColor(entry.values[i]) , fontWeight:'bolder' }} onContextMenu={(e)=>handleRightClick(e,i,index,entry.values[i])} className='tdtable'  onClick={(e) => handleCellClick(e, entry, i,v)}>
                   {getText(entry.values[i])}
-                  {showListModal && tdKey===i && trKey===index ? <div  className="liste" ref={listModalRef}><p className='pliste1' onClick={(e)=>handleChangeHoraire(e)} >Modifier Horaire </p> <p className='pliste2' onClick={(e)=>handleAbsence(e)}>Ajouter abscence</p></div> : ''}
+                  {showListModal && tdKey===i && trKey===index && entry.values[i]? <div  className="liste" ref={listModalRef}><p className='pliste1' onClick={(e)=>handleChangeHoraire(e)} >Modifier Horaire </p> <p className='pliste2' onClick={(e)=>handleAbsence(e)}>Ajouter abscence</p></div> : ''}
                    
 
                   </td>
@@ -622,8 +667,8 @@ const [allDay, setAllDay] = useState(false);
         </select>
           </div>
           <div className='typeev3'>
-          <label htmlFor='effetSelect'  className='modalpeff'>Effet </label><select className='selecteffet'id='effetSelect' value={selectedHoraire} onChange={handleChangeSHoraire} ><option value='' disabled hidden className='optioneffdis'> selectionner effet </option>
-        <option className='optionj' value={1}>J</option><option className='optionn' value={2}>N</option><option className='optionr' value={3}>R</option>
+          <label htmlFor='effetSelect'  className='modalpeff'>Effet </label><select className='selecteffet'id='effetSelect' value={selectedEffet} onChange={handleChangeEffet} ><option value='' disabled hidden className='optioneffdis'> selectionner effet </option>
+        <option className='optionaucun' value={2}>Aucun</option><option className='optionadeduire' value={1}>À deduire</option>
         </select>
 
 
@@ -705,7 +750,7 @@ const [allDay, setAllDay] = useState(false);
       </div>
       </div>
         </div>
-        <div className='absdiv2'>  
+        <div className={remplace ? 'absdiv2' : 'absdiv2 disabled'}>  
         <p className='plists'>Liste des salariés disponibles </p>
         <div className='absdiv3'>
          <p className='typt'>Type de traitement </p>
@@ -716,6 +761,10 @@ const [allDay, setAllDay] = useState(false);
           <label className='lcheck1'>
             <input className='incheck1'
               type="radio"
+              name="options"
+              checked={selectedOption === 'manualEntry'}
+              onClick={() => handleRadioClick('manualEntry')}
+              readOnly
              
             />
             Saisie manuel du matricule 
@@ -725,7 +774,10 @@ const [allDay, setAllDay] = useState(false);
           <label className='lcheck2'>
             <input className='incheck2'
               type="radio"
-              
+              name="options"
+              checked={selectedOption === 'samePole'}
+              onClick={() => handleRadioClick('samePole')}
+              readOnly
             />
             Disponibilité dans le même pôle
           </label>
@@ -736,7 +788,9 @@ const [allDay, setAllDay] = useState(false);
           <label className='lcheck3'>
             <input className='incheck3'
               type="radio"
-              
+              checked={selectedOption === 'sameSite'}
+              onClick={() => handleRadioClick('sameSite')}
+              readOnly
             />
             Disponibilité dans le même chantier 
           </label>
@@ -745,16 +799,55 @@ const [allDay, setAllDay] = useState(false);
           <label className='lcheck4'>
             <input className='incheck4'
               type="radio"
-              
+              checked={selectedOption === 'allAvailability'}
+              onClick={() => handleRadioClick('allAvailability')}
+              readOnly
             />
             Toutes les Disponibilités
           </label>
         </div>
       </div>
          </div>
+         <div className='divrech'>
+          <p className='matp'>Matricule</p>
+        <input className='rechinp'
+          type="text"
+          placeholder="Rechercher..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          ref={inputRef}
+        />
+      </div>
+         <div className='divtab' style={{ maxHeight: '330px', overflowY: 'auto' }}>
+         <table className='tablesal' border={2}>
+  <thead>
+    <tr>
+      <th>Matricule</th>
+      <th>Nom</th>
+      <th>Prénom</th>
+      <th>N°CIN</th>
+    </tr>
+  </thead>
+  <tbody>
+  
+    {filteredSalaries.map((salarie,i) => (
+      <tr key={i} onClick={() => handleRowClick(salarie)} style={{ cursor: 'pointer', backgroundColor: selectedEmployee === salarie ? 'lightblue' : '' }}>
+        <td>{salarie.PERSMATR}</td>
+        <td>{salarie.PERSNOPE}</td>
+        <td>{salarie.PERSPRPE}</td>
+        <td>{salarie.PERSNCIN}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+</div>
+<div className='evbutt'>
+<button className='buttonvhor' style={contentStyleButt} onClick={handleFormSubmit}>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonahor' style={contentStyleButt} onClick={handleCancel}>Fermer <FontAwesomeIcon icon={faTimes} /></button>
+  </div>
 
 
         </div>
+        
         </div> 
         
         

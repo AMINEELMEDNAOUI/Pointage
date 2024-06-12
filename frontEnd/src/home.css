@@ -594,6 +594,10 @@ label[for="horaireSelect"] {
      .absdiv2{
       margin-bottom: 60px;
      }
+     .absdiv2.disabled {
+      pointer-events: none;
+      opacity: 0.5; 
+    }
      
      .plists{
       font-weight: bold;
@@ -674,6 +678,45 @@ label[for="horaireSelect"] {
       accent-color: blue;
      }
 
+     .divtab{
+      margin-top: 50px;
+      margin-left: 100px;
+      margin-right: 11px;
+      
+     
+     }
+     .tablesal{
+      width: 100%;
+     
+
+      
+     }
+     .tablesal th,td{
+      text-align: center;
+     }
+     .divrech{
+      display: flex;
+      position: absolute;
+      top: 21%;
+      left: 40%;
+     }
+     .divrech .rechinp{
+      border-radius: 4px;
+      cursor: pointer;
+     }
+     .divrech .rechinp:hover{
+      background-color: #dcdada;
+     }
+     .matp{
+      position: absolute;
+      right: 150%;
+      font-family: Georgia, 'Times New Roman', Times, serif;
+      font-size: large;
+     }
+    .evbutt{
+      margin-top: 17px;
+      margin-left: 620px;
+    }
     
 
     @media screen and (max-width: 768px) {
@@ -687,4 +730,6 @@ label[for="horaireSelect"] {
         max-height: 250px;
         overflow-y: auto;
       }}
+
+      
 

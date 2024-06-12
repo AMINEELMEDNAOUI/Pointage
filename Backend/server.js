@@ -96,6 +96,14 @@ app.get('/natuabs', (req, res) => {
     });
 });
 
+app.get('/salariesdisp', (req, res) => {
+    const sql = `SELECT DISTINCT PERSMATR ,PERSNOPE , PERSPRPE,PERSNCIN FROM EXT_RHPERSONNES  WHERE PERSMATR NOT IN (SELECT PERSMATR FROM EXT_RHPLANNIN) LIMIT 20`;
+    db.query(sql, (err, data) => {
+        if (err) return res.json(err);
+        return res.json(data);
+    });
+});
+
 app.put('/planning', (req, res) => {
     const { client, site, matricule, pole, date, horaire } = req.body;
   
