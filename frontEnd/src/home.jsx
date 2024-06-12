@@ -315,27 +315,30 @@ const [allDay, setAllDay] = useState(false);
 
   const uniqueValuesArray = [];
 
-  salaries.forEach(salary => {
-      const isSameGroup = (item) => 
-          item.PERSMATR === salary.PERSMATR && 
-          item.PERSNOPE === salary.PERSNOPE &&
-          item.PERSPRPE === salary.PERSPRPE &&
-          item.LIBEABR === salary.LIBEABR;
-  
-      let entry = uniqueValuesArray.find(isSameGroup);
-      
-      if (!entry) {
-          entry = {
-              PERSMATR: salary.PERSMATR,
-              PERSNOPE: salary.PERSNOPE,
-              PERSPRPE: salary.PERSPRPE,
-              LIBEABR: salary.LIBEABR,
-              values: []
-          };
-          uniqueValuesArray.push(entry);
-      }
-      entry.values.push(salary.PLANPAJO);
-  });
+salaries.forEach(salary => {
+    const isSameGroup = (item) => 
+        item.PERSMATR === salary.PERSMATR && 
+        item.PERSNOPE === salary.PERSNOPE &&
+        item.PERSPRPE === salary.PERSPRPE &&
+        item.LIBEABR === salary.LIBEABR;
+
+    let entry = uniqueValuesArray.find(isSameGroup);
+    
+    if (!entry) {
+        entry = {
+            PERSMATR: salary.PERSMATR,
+            PERSNOPE: salary.PERSNOPE,
+            PERSPRPE: salary.PERSPRPE,
+            LIBEABR: salary.LIBEABR,
+            PLANDATE: [],
+            values: []
+        };
+        uniqueValuesArray.push(entry);
+    }
+    entry.PLANDATE.push(salary.PLANDATE); 
+    entry.values.push(salary.PLANPAJO);
+});
+
 
   const getColor = (value) => {
     switch (value) {
@@ -583,6 +586,8 @@ const [allDay, setAllDay] = useState(false);
           </div>
         </div>
       </div>
+     
+
       {selectedPeriodes && selectedPoles && selectedClientsId && selectedSitesId &&(
       <div className="table-c">
       <div className="table-container">
@@ -605,26 +610,37 @@ const [allDay, setAllDay] = useState(false);
           </thead>
           
           <tbody>
-                {uniqueValuesArray.map((entry, index) => (
-                  <tr key={index}>
-                    <td style={{ fontSize: '15px' }}>
-                      {entry.PERSMATR}/-{entry.PERSNOPE} {entry.PERSPRPE}
-                    </td>
-                <td style={{textAlign:'center'}}>
-                {entry.LIBEABR}
-                  </td>
-                {Array.from({ length: daysInMonth }, (_, i) => (
-                  <td key={i + 1} style={{ textAlign: 'center', color: getColor(entry.values[i]) , fontWeight:'bolder' }} onContextMenu={(e)=>handleRightClick(e,i,index,entry.values[i])} className='tdtable'  onClick={(e) => handleCellClick(e, entry, i,v)}>
-                  {getText(entry.values[i])}
-                  {showListModal && tdKey===i && trKey===index && entry.values[i]? <div  className="liste" ref={listModalRef}><p className='pliste1' onClick={(e)=>handleChangeHoraire(e)} >Modifier Horaire </p> <p className='pliste2' onClick={(e)=>handleAbsence(e)}>Ajouter abscence</p></div> : ''}
-                   
+  {uniqueValuesArray.map((entry, index) => (
+    <tr key={index}>
+      <td style={{ fontSize: '15px' }}>
+        {entry.PERSMATR}/-{entry.PERSNOPE} {entry.PERSPRPE}
+      </td>
+      <td style={{ textAlign: 'center' }}>
+        {entry.LIBEABR}
+      </td>
+      {Array.from({ length: daysInMonth }, (_, i) => {
+        const currentDate = new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1);
+        const currentDateString = currentDate.toISOString().slice(0, 10); // Format de date ISO (YYYY-MM-DD)
+        const matchingIndex = entry.PLANDATE.findIndex(date => date.slice(0, 10) === currentDateString);
+        const matchingValue = matchingIndex !== -1 ? entry.values[matchingIndex] : null;
+        return (
+          <td key={i + 1} style={{ textAlign: 'center', color: getColor(matchingValue), fontWeight: 'bolder' }} onContextMenu={(e) => handleRightClick(e, i, index, matchingValue)} className='tdtable' onClick={(e) => handleCellClick(e, entry, i, v)}>
+            {getText(matchingValue)}
+           
+            {showListModal && tdKey === i && trKey === index && matchingValue ? 
+              <div className="liste" ref={listModalRef}>
+                <p className='pliste1' onClick={(e) => handleChangeHoraire(e)}>Modifier Horaire</p> 
+                <p className='pliste2' onClick={(e) => handleAbsence(e)}>Ajouter abscence</p>
+              </div> 
+              : ''
+            }
+          </td>
+        );
+      })}
+    </tr>
+  ))}
+</tbody>
 
-                  </td>
-                  
-                ))}
-              </tr>
-            ))}
-          </tbody>
         </table>
       </div>
       {showModalHoraire ? <div className={`listehor ${isMaximized ? 'maximized' : ''}`} ref={horaireModalRef}>
