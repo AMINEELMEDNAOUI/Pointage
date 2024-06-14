@@ -183,6 +183,7 @@ table td{
   padding-top: 7px;
   padding-left: 4px;
   padding-bottom: 7px;
+  font-family:Georgia, 'Times New Roman', Times, serif;
 
 
 }
@@ -257,6 +258,18 @@ table td{
   font-weight: bolder;
   margin-left: 6px; 
 }
+.buttonfabs,.buttonvabs{
+  border-radius: 5px;
+}
+.buttonfabs{
+  color:red;
+  font-weight: bolder;
+  margin-left: 6px;
+}
+.buttonvabs{
+  color: green;
+  font-weight: bolder;
+}
 .horbutt{
   position: absolute;
   top:91%;
@@ -314,9 +327,19 @@ label[for="horaireSelect"] {
       cursor: pointer;
       margin-right: 5px;
       font-size: larger;
-      border:1px solid rgb(130, 129, 129);
+      border:1px solid rgb(211, 211, 211);
       padding: 2px; 
       margin-top: 3px;
+      
+    }
+    .modal-close{
+      width: 18px;
+    }
+    .modal-maximize:hover{
+      background-color:rgb(171, 170, 170);
+    }
+    .modal-close:hover{
+      background-color: red;
     }
     .maximized{
       width:1000px;
@@ -333,7 +356,7 @@ label[for="horaireSelect"] {
     }
     .titreabs{
       margin:0;
-      margin-right: 1066px;
+      margin-right: 1063px;
       font-weight:900;
       font-size: larger;
       
@@ -714,8 +737,9 @@ label[for="horaireSelect"] {
       font-size: large;
      }
     .evbutt{
-      margin-top: 17px;
-      margin-left: 620px;
+      position: absolute;
+      left: 77%;
+      top: 93%;
     }
     
 

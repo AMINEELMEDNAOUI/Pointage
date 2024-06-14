@@ -134,11 +134,24 @@ const [allDay, setAllDay] = useState(false);
   }, []);
 
   useEffect(() => {
-    fetch(`http://localhost:8081/salariesdisp`)
-      .then(res => res.json())
-      .then(data => setSalariesDisp(data))
-      .catch(err => console.log(err));
-  }, []);
+    if (selectedPeriodes && selectedPoles && selectedClientsId && selectedSitesId && selectedDayIndex) {
+        const [TIRID, CNAME] = selectedClientsId.split('-');
+        const [ADRID, SNAME] = selectedSitesId.split('-');
+        const [MONTH, YEAR] = selectedPeriodes.split('-');
+        const [pole, npole] = selectedPoles.split('-');
+        const selectedDay = (parseInt(selectedDayIndex) + 1).toString().padStart(2, '0');
+        const formattedDate = `${YEAR}-${MONTH.padStart(2, '0')}-${selectedDay}`;
+
+        fetch(`http://localhost:8081/salariesdisp?TIRID=${TIRID}&ADRID=${ADRID}&MONTH=${MONTH}&YEAR=${YEAR}&formattedDate=${formattedDate}&pole=${pole}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log('Received data:', data);
+                setSalariesDisp(data);
+            })
+            .catch(err => console.log('Fetch error:', err));
+    }
+}, [selectedClientsId, selectedSitesId, selectedPeriodes, selectedDayIndex, selectedPoles]);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -216,10 +229,13 @@ const [allDay, setAllDay] = useState(false);
     } else {
       setSelectedOption(option); 
     }
-    if (option === 'manualEntry' && inputRef.current) {
-      inputRef.current.focus();
-    }
+    
   };
+   useEffect(() => {
+    if (selectedOption === 'manualEntry') {
+      inputRef.current?.focus(); 
+    }
+  }, [selectedOption]);
 
   useEffect(() => {
     if (!allDay) {
@@ -385,7 +401,7 @@ salaries.forEach(salary => {
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
-  const filteredSalaries = salariesDisp.filter((salarie) => {
+  const filteredSalaries = Array.isArray(salariesDisp) ? salariesDisp.filter((salarie) => {
     const searchTermLowerCase = searchTerm.toLowerCase();
     return (
       salarie.PERSMATR.toLowerCase().includes(searchTermLowerCase) ||
@@ -393,7 +409,7 @@ salaries.forEach(salary => {
       salarie.PERSPRPE.toLowerCase().includes(searchTermLowerCase) ||
       salarie.PERSNCIN.toLowerCase().includes(searchTermLowerCase)
     );
-  });
+  }):[];
 
   const handleChangeHoraire=(e)=> {
     e.preventDefault();
@@ -432,14 +448,18 @@ salaries.forEach(salary => {
   setStartDate(initialDate);
 }, [selectedPeriodes, mois, annee, selectedDayIndex]);
 
+
+
  const contentStyle = isMaximized ? { fontSize: '30px',  } : {};
  const contentStyleSelect = isMaximized ? { width: '500px',height:'50px',fontSize:'30px' } : {};
  const contentStyleButt = isMaximized ? { width: '140px',height:'45px',fontSize:'25px' ,marginLeft:'13px' } : {};
  const contentStyleButtx = isMaximized ? { fontSize:'30px' } : {};
  const contentStylep = isMaximized ? { fontSize:'22px' ,marginRight:'625px' } : {};
  const contentStylediv = isMaximized ? { height:'350px' } : {};
+ 
   return (
     <>
+    
       <p className='header-title'>Pointage - Cycles par chantier</p>
       <div className='select-container'>
         <div className="pcvc-container">
@@ -624,13 +644,13 @@ salaries.forEach(salary => {
         const matchingIndex = entry.PLANDATE.findIndex(date => date.slice(0, 10) === currentDateString);
         const matchingValue = matchingIndex !== -1 ? entry.values[matchingIndex] : null;
         return (
-          <td key={i + 1} style={{ textAlign: 'center', color: getColor(matchingValue), fontWeight: 'bolder' }} onContextMenu={(e) => handleRightClick(e, i, index, matchingValue)} className='tdtable' onClick={(e) => handleCellClick(e, entry, i, v)}>
+          <td key={i + 1} style={{ textAlign: 'center', color: getColor(matchingValue), fontWeight: 'bolder' }} onContextMenu={(e) => handleRightClick(e, i, index, matchingValue)} className='tdtable' onClick={(e) => handleCellClick(e, entry, i,matchingValue )}>
             {getText(matchingValue)}
            
             {showListModal && tdKey === i && trKey === index && matchingValue ? 
               <div className="liste" ref={listModalRef}>
                 <p className='pliste1' onClick={(e) => handleChangeHoraire(e)}>Modifier Horaire</p> 
-                <p className='pliste2' onClick={(e) => handleAbsence(e)}>Ajouter abscence</p>
+                <p className='pliste2' onClick={(e) => handleAbsence(e)}>Ajouter Abscence</p>
               </div> 
               : ''
             }
@@ -832,6 +852,7 @@ salaries.forEach(salary => {
           value={searchTerm}
           onChange={handleSearchChange}
           ref={inputRef}
+          disabled={selectedOption !== 'manualEntry'}
         />
       </div>
          <div className='divtab' style={{ maxHeight: '330px', overflowY: 'auto' }}>
@@ -858,7 +879,7 @@ salaries.forEach(salary => {
 </table>
 </div>
 <div className='evbutt'>
-<button className='buttonvhor' style={contentStyleButt} onClick={handleFormSubmit}>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonahor' style={contentStyleButt} onClick={handleCancel}>Fermer <FontAwesomeIcon icon={faTimes} /></button>
+<button className='buttonvabs' style={contentStyleButt} onClick={handleFormSubmit}>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonfabs' style={contentStyleButt} onClick={handleCancel}>Fermer <FontAwesomeIcon icon={faTimes} /></button>
   </div>
 
 

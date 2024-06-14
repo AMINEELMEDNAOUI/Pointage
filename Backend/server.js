@@ -82,7 +82,7 @@ app.get('/planning', (req, res) => {
     const MONTH =req.query.MONTH ;
     const YEAR = req.query.YEAR ;
     const pole = req.query.pole;
-    const sql = `SELECT PL.PERSMATR , P.PERSNOPE , P.PERSPRPE , PL.PLANPAJO,PL.PLANDATE, TA.LIBEABR  FROM EXT_RHPLANNIN PL JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT WHERE PL.TIRID = '${clientId}'  AND PL.ADRID = '${siteId}'  AND MONTH(PL.PLANDATE) = '${MONTH}'  AND YEAR(PL.PLANDATE) = '${YEAR}'  AND PL.STATNATURE = '${pole}';`;
+    const sql = `SELECT PL.PERSMATR , P.PERSNOPE , P.PERSPRPE , PL.PLANPAJO,PL.PLANDATE,TA.LIBEABR  FROM EXT_RHPLANNIN PL JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT WHERE PL.TIRID = '${clientId}'  AND PL.ADRID = '${siteId}'  AND MONTH(PL.PLANDATE) = '${MONTH}'  AND YEAR(PL.PLANDATE) = '${YEAR}'  AND PL.STATNATURE = '${pole}';`;
     db.query(sql, (err, data) => {
         if (err) return res.json(err);
         return res.json(data);
@@ -97,7 +97,31 @@ app.get('/natuabs', (req, res) => {
 });
 
 app.get('/salariesdisp', (req, res) => {
-    const sql = `SELECT DISTINCT PERSMATR ,PERSNOPE , PERSPRPE,PERSNCIN FROM EXT_RHPERSONNES  WHERE PERSMATR NOT IN (SELECT PERSMATR FROM EXT_RHPLANNIN) LIMIT 20`;
+    const clientId = req.query.TIRID; 
+    const siteId = req.query.ADRID; 
+    const MONTH =req.query.MONTH ;
+    const YEAR = req.query.YEAR ;
+    const pole = req.query.pole;
+    const date=req.query.formattedDate;
+    const sql = `SELECT DISTINCT PL.PERSMATR,P.PERSNOPE,P.PERSPRPE,P.PERSNCIN
+FROM EXT_RHPLANNIN PL
+JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR
+JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT
+WHERE PL.TIRID = '${clientId}'
+  AND PL.ADRID = '${siteId}'
+  AND MONTH(PL.PLANDATE) = '${MONTH}'
+  AND YEAR(PL.PLANDATE) = '${YEAR}'
+  AND PL.STATNATURE = '${pole}'
+  AND PL.PERSMATR IN (
+      SELECT sal.PERSMATR
+      FROM EXT_RHPERSONNES AS sal
+      LEFT JOIN EXT_RHPLANNIN AS pla ON sal.PERSMATR = pla.PERSMATR
+                                       AND pla.PLANDATE= '${date}'
+                                       AND pla.TIRID = '${clientId}'
+                                       AND pla.ADRID = '${siteId}'
+                                       AND pla.STATNATURE = '${pole}'
+      WHERE pla.PERSMATR IS NULL
+  );`;
     db.query(sql, (err, data) => {
         if (err) return res.json(err);
         return res.json(data);
