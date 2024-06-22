@@ -134,23 +134,85 @@ const [allDay, setAllDay] = useState(false);
   }, []);
 
   useEffect(() => {
-    if (selectedPeriodes && selectedPoles && selectedClientsId && selectedSitesId && selectedDayIndex) {
+    if (selectedPeriodes && selectedPoles && selectedClientsId && selectedSitesId && selectedDayIndex+1) {
+    
+    
+    
+      if(selectedOption==='sameSite'){
         const [TIRID, CNAME] = selectedClientsId.split('-');
         const [ADRID, SNAME] = selectedSitesId.split('-');
         const [MONTH, YEAR] = selectedPeriodes.split('-');
         const [pole, npole] = selectedPoles.split('-');
         const selectedDay = (parseInt(selectedDayIndex) + 1).toString().padStart(2, '0');
         const formattedDate = `${YEAR}-${MONTH.padStart(2, '0')}-${selectedDay}`;
+        const initialDate = `${YEAR}-${String(MONTH).padStart(2, '0')}-${String(selectedDayIndex + 1).padStart(2, '0')}`;
 
-        fetch(`http://localhost:8081/salariesdisp?TIRID=${TIRID}&ADRID=${ADRID}&MONTH=${MONTH}&YEAR=${YEAR}&formattedDate=${formattedDate}&pole=${pole}`)
+        fetch(`http://localhost:8081/salariesdispmc?TIRID=${TIRID}&ADRID=${ADRID}&MONTH=${MONTH}&YEAR=${YEAR}&startDate=${startDate}&endDate=${endDate}&startTime=${startTime}&endTime=${endTime}&pole=${pole}`)
             .then(res => res.json())
             .then(data => {
                 console.log('Received data:', data);
+                console.log(initialDate);
                 setSalariesDisp(data);
+                
+
             })
             .catch(err => console.log('Fetch error:', err));
     }
-}, [selectedClientsId, selectedSitesId, selectedPeriodes, selectedDayIndex, selectedPoles]);
+    else if (selectedOption===null){
+      setSalariesDisp([]);
+    }
+
+    if(selectedOption==='samePole'){
+      const [TIRID, CNAME] = selectedClientsId.split('-');
+      const [MONTH, YEAR] = selectedPeriodes.split('-');
+      const [pole, npole] = selectedPoles.split('-');
+      const selectedDay = (parseInt(selectedDayIndex) + 1).toString().padStart(2, '0');
+      const formattedDate = `${YEAR}-${MONTH.padStart(2, '0')}-${selectedDay}`;
+      const initialDate = `${YEAR}-${String(MONTH).padStart(2, '0')}-${String(selectedDayIndex + 1).padStart(2, '0')}`;
+      console.log(startDate);
+      console.log(endDate);
+      fetch(`http://localhost:8081/salariesdispmp?TIRID=${TIRID}&MONTH=${MONTH}&YEAR=${YEAR}&startDate=${startDate}&endDate=${endDate}&startTime=${startTime}&endTime=${endTime}&pole=${pole}`)
+          .then(res => res.json())
+          .then(data => {
+              console.log('Received data:', data);
+              console.log(initialDate);
+              setSalariesDisp(data);
+              
+
+          })
+          .catch(err => console.log('Fetch error:', err));
+  }
+  else if (selectedOption===null){
+    setSalariesDisp([]);
+  }
+  if(selectedOption==='allAvailability'){
+    
+    const [MONTH, YEAR] = selectedPeriodes.split('-');
+    
+    const selectedDay = (parseInt(selectedDayIndex) + 1).toString().padStart(2, '0');
+    const formattedDate = `${YEAR}-${MONTH.padStart(2, '0')}-${selectedDay}`;
+    const initialDate = `${YEAR}-${String(MONTH).padStart(2, '0')}-${String(selectedDayIndex + 1).padStart(2, '0')}`;
+
+    fetch(`http://localhost:8081/salariesdisptd?&MONTH=${MONTH}&YEAR=${YEAR}&startDate=${startDate}&endDate=${endDate}&startTime=${startTime}&endTime=${endTime}`)
+        .then(res => res.json())
+        .then(data => {
+            console.log('Received data:', data);
+            console.log(initialDate);
+            setSalariesDisp(data);
+            
+
+        })
+        .catch(err => console.log('Fetch error:', err));
+}
+else if (selectedOption===null){
+  setSalariesDisp([]);
+}
+
+}
+
+
+
+}, [selectedClientsId, selectedSitesId, selectedPeriodes, selectedDayIndex, selectedPoles ,selectedOption]);
 
 
   useEffect(() => {
@@ -225,9 +287,10 @@ const [allDay, setAllDay] = useState(false);
   };
   const handleRadioClick = (option) => {
     if (selectedOption === option) {
-      setSelectedOption(null); 
+      setSelectedOption(null);
     } else {
       setSelectedOption(option); 
+     
     }
     
   };
@@ -235,6 +298,7 @@ const [allDay, setAllDay] = useState(false);
     if (selectedOption === 'manualEntry') {
       inputRef.current?.focus(); 
     }
+    
   }, [selectedOption]);
 
   useEffect(() => {
@@ -456,10 +520,13 @@ salaries.forEach(salary => {
  const contentStyleButtx = isMaximized ? { fontSize:'30px' } : {};
  const contentStylep = isMaximized ? { fontSize:'22px' ,marginRight:'625px' } : {};
  const contentStylediv = isMaximized ? { height:'350px' } : {};
+ const contentStylepe = isMaximized ? { fontSize:'22px' ,marginRight:'1025px' } : {};
+
+ 
  
   return (
     <>
-    
+    {selectedClientsId}{selectedSitesId}{selectedPoles}
       <p className='header-title'>Pointage - Cycles par chantier</p>
       <div className='select-container'>
         <div className="pcvc-container">
@@ -640,7 +707,7 @@ salaries.forEach(salary => {
       </td>
       {Array.from({ length: daysInMonth }, (_, i) => {
         const currentDate = new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1);
-        const currentDateString = currentDate.toISOString().slice(0, 10); // Format de date ISO (YYYY-MM-DD)
+        const currentDateString = currentDate.toISOString().slice(0, 10); 
         const matchingIndex = entry.PLANDATE.findIndex(date => date.slice(0, 10) === currentDateString);
         const matchingValue = matchingIndex !== -1 ? entry.values[matchingIndex] : null;
         return (
@@ -680,7 +747,7 @@ salaries.forEach(salary => {
         
         {showModalAbsence ? <div className='listeabsence' ref={absenceModalRef}>
         <div className='modal-header'> 
-        <p className="titreabs" style={contentStylep}>Fiche - Evènements</p>
+        <p className="titreabs" style={contentStylepe}>Fiche - Evènements</p>
           <FontAwesomeIcon icon={isMaximized ? faCompress : faExpand} className='modal-maximize' onClick={handleMaximize} style={contentStyleButtx}/>
           <FontAwesomeIcon icon={faTimes} className='modal-close' onClick={handleCancel} style={contentStyleButtx} />
         </div>
@@ -879,15 +946,16 @@ salaries.forEach(salary => {
 </table>
 </div>
 <div className='evbutt'>
-<button className='buttonvabs' style={contentStyleButt} onClick={handleFormSubmit}>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonfabs' style={contentStyleButt} onClick={handleCancel}>Fermer <FontAwesomeIcon icon={faTimes} /></button>
+
   </div>
 
 
         </div>
         
         </div> 
-        
-        
+        <div className='buttonsabs'>
+        <button className='buttonvabs'  onClick={handleFormSubmit}>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonfabs'  onClick={handleCancel}>Fermer <FontAwesomeIcon icon={faTimes} /></button>
+        </div>
         </div>
         </div> : ''}
       </div>

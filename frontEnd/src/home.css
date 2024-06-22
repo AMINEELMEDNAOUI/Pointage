@@ -107,7 +107,7 @@ tr:nth-child(odd) {
 }
 .table-c{
   background-color: #f1f1f1;
-  height:100vh;
+  height:70vh;
   overflow-x: auto; 
   overflow-y: auto; 
 
@@ -145,7 +145,8 @@ tr:nth-child(odd) {
 
 table {
 
-  table-layout: fixed; 
+  table-layout: fixed;
+ 
   
 }
 table td{
@@ -274,6 +275,11 @@ table td{
   position: absolute;
   top:91%;
   left:69%;
+}
+.buttonsabs{
+  position: absolute;
+  top: 90%;
+  left: 85%;
 }
 label[for="horaireSelect"] {
   font-weight: bold;
@@ -754,6 +760,48 @@ label[for="horaireSelect"] {
         max-height: 250px;
         overflow-y: auto;
       }}
+      @page {
+        margin: 0;
+        size: auto;
+    }
+
+      @media print {
+        body {
+          margin: 0;
+          padding: 0;
+        
+          
+      }
+        .select-container {
+            flex-direction: column;
+            
+        }
+       .pcvc-container{
+        position: absolute;
+       }
+       .period-container{
+        position: absolute;
+        top: 13%;
+       }
+       .table-c{
+        position: absolute;
+        top: 22%;
+        
+       
+       }
+       table {
+        page-break-inside: auto;
+        
+    }
+
+    thead {
+        display: table-header-group; /* Assure que l'en-tête se répète */
+    }
+
+    tr {
+        page-break-inside: avoid; /* Empêche la rupture de page à l'intérieur des lignes */
+    }
+    }
 
       
 

@@ -96,37 +96,194 @@ app.get('/natuabs', (req, res) => {
     });
 });
 
-app.get('/salariesdisp', (req, res) => {
+app.get('/salariesdispmc', (req, res) => {
     const clientId = req.query.TIRID; 
     const siteId = req.query.ADRID; 
-    const MONTH =req.query.MONTH ;
-    const YEAR = req.query.YEAR ;
+    const MONTH = req.query.MONTH;
+    const YEAR = req.query.YEAR;
     const pole = req.query.pole;
-    const date=req.query.formattedDate;
-    const sql = `SELECT DISTINCT PL.PERSMATR,P.PERSNOPE,P.PERSPRPE,P.PERSNCIN
-FROM EXT_RHPLANNIN PL
-JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR
-JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT
-WHERE PL.TIRID = '${clientId}'
-  AND PL.ADRID = '${siteId}'
-  AND MONTH(PL.PLANDATE) = '${MONTH}'
-  AND YEAR(PL.PLANDATE) = '${YEAR}'
-  AND PL.STATNATURE = '${pole}'
-  AND PL.PERSMATR IN (
-      SELECT sal.PERSMATR
-      FROM EXT_RHPERSONNES AS sal
-      LEFT JOIN EXT_RHPLANNIN AS pla ON sal.PERSMATR = pla.PERSMATR
-                                       AND pla.PLANDATE= '${date}'
-                                       AND pla.TIRID = '${clientId}'
-                                       AND pla.ADRID = '${siteId}'
-                                       AND pla.STATNATURE = '${pole}'
-      WHERE pla.PERSMATR IS NULL
-  );`;
+    const date = req.query.formattedDate;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    const startTime = req.query.startTime;
+    const endTime = req.query.endTime;
+
+    let sql = '';
+
+    if (pole === '1122') {
+        
+        sql = `SELECT DISTINCT PL.PERSMATR, P.PERSNOPE, P.PERSPRPE, P.PERSNCIN
+            FROM EXT_RHPLANNIN PL
+            JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR
+            JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT
+            WHERE PL.TIRID = '${clientId}'
+              AND PL.ADRID = '${siteId}'
+              AND MONTH(PL.PLANDATE) = '${MONTH}'
+              AND YEAR(PL.PLANDATE) = '${YEAR}'
+              AND PL.STATNATURE = '${pole}'
+              AND PL.PERSMATR IN (
+                  SELECT sal.PERSMATR
+                  FROM EXT_RHPERSONNES AS sal
+                  LEFT JOIN EXT_RHPLANNIN AS pla ON sal.PERSMATR = pla.PERSMATR
+                                               AND pla.PLANDATE BETWEEN '${startDate}' AND '${endDate}'
+                                               AND pla.TIRID = '${clientId}'
+                                               AND pla.ADRID = '${siteId}'
+                                               AND pla.STATNATURE = '${pole}'
+                                               AND (
+                                                   (pla.PLANDEHE <= '${startTime}' AND pla.PLANFIHE >= '${endTime}') OR
+                                                   (pla.PLANDEHE >= '${startTime}' AND pla.PLANDEHE < '${endTime}') OR
+                                                   (pla.PLANFIHE > '${startTime}' AND pla.PLANFIHE <= '${endTime}')
+                                               )
+                  WHERE pla.PERSMATR IS NULL
+              );`;
+    } else {
+       
+        sql = `SELECT DISTINCT PL.PERSMATR, P.PERSNOPE, P.PERSPRPE, P.PERSNCIN
+        FROM EXT_RHPLANNIN PL
+        JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR
+        JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT
+        WHERE PL.TIRID = '${clientId}'
+          AND PL.ADRID = '${siteId}'
+          AND MONTH(PL.PLANDATE) = '${MONTH}'
+          AND YEAR(PL.PLANDATE) = '${YEAR}'
+          AND PL.STATNATURE = '${pole}'
+          AND PL.PERSMATR IN (
+              SELECT sal.PERSMATR
+              FROM EXT_RHPERSONNES AS sal
+              LEFT JOIN EXT_RHPLANNIN AS pla ON sal.PERSMATR = pla.PERSMATR
+                                           AND pla.PLANDATE BETWEEN '${startDate}' AND '${endDate}'
+                                           AND pla.TIRID = '${clientId}'
+                                           AND pla.ADRID = '${siteId}'
+                                           AND pla.STATNATURE = '${pole}'
+                                           
+              WHERE pla.PERSMATR IS NULL
+          );`;
+    }
+
     db.query(sql, (err, data) => {
         if (err) return res.json(err);
         return res.json(data);
-    });
+    });
 });
+
+
+app.get('/salariesdispmp', (req, res) => {
+    const clientId = req.query.TIRID; 
+    const MONTH = req.query.MONTH;
+    const YEAR = req.query.YEAR;
+    const pole = req.query.pole;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    const startTime = req.query.startTime;
+    const endTime = req.query.endTime;
+
+    let sql = '';
+
+    if (pole === '1122') {
+        
+        sql = `SELECT DISTINCT PL.PERSMATR, P.PERSNOPE, P.PERSPRPE, P.PERSNCIN
+            FROM EXT_RHPLANNIN PL
+            JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR
+            JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT
+            WHERE PL.TIRID = '${clientId}'
+              AND MONTH(PL.PLANDATE) = '${MONTH}'
+              AND YEAR(PL.PLANDATE) = '${YEAR}'
+              AND PL.STATNATURE = '${pole}'
+              AND PL.PERSMATR IN (
+                  SELECT sal.PERSMATR
+                  FROM EXT_RHPERSONNES AS sal
+                  LEFT JOIN EXT_RHPLANNIN AS pla ON sal.PERSMATR = pla.PERSMATR
+                                               AND pla.PLANDATE BETWEEN '${startDate}' AND '${endDate}'
+                                               AND pla.TIRID = '${clientId}'
+                                               AND pla.STATNATURE = '${pole}'
+                                               AND (
+                                                   (pla.PLANDEHE <= '${startTime}' AND pla.PLANFIHE >= '${endTime}') OR
+                                                   (pla.PLANDEHE >= '${startTime}' AND pla.PLANDEHE < '${endTime}') OR
+                                                   (pla.PLANFIHE > '${startTime}' AND pla.PLANFIHE <= '${endTime}')
+                                               )
+                  WHERE pla.PERSMATR IS NULL
+              );`;
+    } else {
+        sql = `SELECT DISTINCT PL.PERSMATR, P.PERSNOPE, P.PERSPRPE, P.PERSNCIN
+            FROM EXT_RHPLANNIN PL
+            JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR
+            JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT
+            WHERE PL.TIRID = '${clientId}'
+              AND MONTH(PL.PLANDATE) = '${MONTH}'
+              AND YEAR(PL.PLANDATE) = '${YEAR}'
+              AND PL.STATNATURE = '${pole}'
+              AND PL.PERSMATR IN (
+                  SELECT sal.PERSMATR
+                  FROM EXT_RHPERSONNES AS sal
+                  LEFT JOIN EXT_RHPLANNIN AS pla ON sal.PERSMATR = pla.PERSMATR
+                                               AND pla.PLANDATE BETWEEN '${startDate}' AND '${endDate}'
+                                               AND pla.TIRID = '${clientId}'
+                                               AND pla.STATNATURE = '${pole}'
+                                              
+                  WHERE pla.PERSMATR IS NULL
+              );`;
+    }
+
+    db.query(sql, (err, data) => {
+        if (err) return res.json(err);
+        return res.json(data);
+    });
+});
+
+app.get('/salariesdisptd', (req, res) => {
+    const MONTH = req.query.MONTH;
+    const YEAR = req.query.YEAR;
+    const pole = req.query.pole;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    const startTime = req.query.startTime;
+    const endTime = req.query.endTime;
+
+    let sql = '';
+
+    if (pole === '1122') {
+        
+        sql = `SELECT DISTINCT PL.PERSMATR, P.PERSNOPE, P.PERSPRPE, P.PERSNCIN
+            FROM EXT_RHPLANNIN PL
+            JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR
+            JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT
+            WHERE MONTH(PL.PLANDATE) = '${MONTH}'
+              AND YEAR(PL.PLANDATE) = '${YEAR}'
+              AND PL.PERSMATR IN (
+                  SELECT sal.PERSMATR
+                  FROM EXT_RHPERSONNES AS sal
+                  LEFT JOIN EXT_RHPLANNIN AS pla ON sal.PERSMATR = pla.PERSMATR
+                                               AND pla.PLANDATE BETWEEN '${startDate}' AND '${endDate}'
+                                               AND (
+                                                   (pla.PLANDEHE <= '${startTime}' AND pla.PLANFIHE >= '${endTime}') OR
+                                                   (pla.PLANDEHE >= '${startTime}' AND pla.PLANDEHE < '${endTime}') OR
+                                                   (pla.PLANFIHE > '${startTime}' AND pla.PLANFIHE <= '${endTime}')
+                                               )
+                  WHERE pla.PERSMATR IS NULL
+              );`;
+    } else {
+        sql = `SELECT DISTINCT PL.PERSMATR, P.PERSNOPE, P.PERSPRPE, P.PERSNCIN
+        FROM EXT_RHPLANNIN PL
+        JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR
+        JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT
+        WHERE MONTH(PL.PLANDATE) = '${MONTH}'
+          AND YEAR(PL.PLANDATE) = '${YEAR}'
+          AND PL.PERSMATR IN (
+              SELECT sal.PERSMATR
+              FROM EXT_RHPERSONNES AS sal
+              LEFT JOIN EXT_RHPLANNIN AS pla ON sal.PERSMATR = pla.PERSMATR
+                                           AND pla.PLANDATE BETWEEN '${startDate}' AND '${endDate}'
+                                          
+              WHERE pla.PERSMATR IS NULL
+          );`;
+    }
+
+    db.query(sql, (err, data) => {
+        if (err) return res.json(err);
+        return res.json(data);
+    });
+});
+
 
 app.put('/planning', (req, res) => {
     const { client, site, matricule, pole, date, horaire } = req.body;
