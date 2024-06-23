@@ -307,27 +307,81 @@ app.put('/planning', (req, res) => {
       res.json({ message: 'Planning mis à jour avec succès.', results });
     });
   });
+  app.get('/absences', (req, res) => {
+    const sql = `SELECT 
+                    PERSMATR, 
+                    DATE_ADD(ABSEDEHE, INTERVAL 1 DAY) AS ABSEDEHE,
+                    DATE_ADD(ABSEFIHE, INTERVAL 1 DAY) AS ABSEFIHE,
+                    NAABCODE 
+                 FROM EXT_RHABSENCES`; 
 
-app.delete('/planning', (req, res) => {
-    const { client, site, matricule, date } = req.body;
-
-    const sql = `DELETE FROM PLANNING WHERE TIRID = ? AND ADRID = ? AND PERSMATR = ? AND PLANDATE = ?`;
-    db.query(sql, [client, site, matricule, date], (err, result) => {
-        if (err) return res.json(err);
-        return res.json({ message: 'Ligne supprimée avec succès', affectedRows: result.affectedRows });
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Erreur lors de la récupération des absences :', err);
+            res.status(500).json({ error: 'Erreur lors de la récupération des absences' });
+        } else {
+            console.log('Récupération des absences depuis la base de données :', results);
+            res.json(results); 
+        }
     });
 });
 
 
-app.post('/planning', (req, res) => {
-    const { client, site, matricule, date } = req.body; 
 
-    const sql = `INSERT INTO PLANNING (TIRID , ADRID , PERSMATR , PLANDATE) VALUES (?, ?, ?, ?)`;
-    db.query(sql, [client, site, matricule, date], (err, result) => {
+
+
+app.post('/absence', (req, res) => {
+    const {PERSMATR , NAABCODE , NATUDESI , NATUEFFE,ABSEDEHE,ABSEFIHE,ABSENBHR,ABSEDATE} = req.body; 
+
+    const sql = `INSERT INTO EXT_RHABSENCES (PERSMATR , NAABCODE , NATUDESI , NATUEFFE , ABSEDEHE,ABSEFIHE,ABSENBHR,ABSEDATE) VALUES (?, ?, ?, ?,?, ?, ?, ?)`;
+    db.query(sql, [PERSMATR , NAABCODE , NATUDESI , NATUEFFE,ABSEDEHE,ABSEFIHE,ABSENBHR,ABSEDATE], (err, result) => {
         if (err) return res.json(err);
         return res.json({ message: 'Ligne ajoutée avec succès', insertId: result.insertId });
     });
 });
+
+app.get('/absence/exist', (req, res) => {
+    const { PERSMATR, ABSEDATE } = req.query;
+    const sql = 'SELECT COUNT(*) AS count FROM EXT_RHABSENCES WHERE PERSMATR = ? AND ABSEDATE = ?';
+
+    db.query(sql, [PERSMATR, ABSEDATE], (err, results) => {
+        if (err) {
+            console.error('Erreur lors de la vérification de l\'existence de l\'absence :', err);
+            res.status(500).json({ error: 'Erreur lors de la vérification de l\'existence de l\'absence' });
+        } else {
+            const exists = results[0].count > 0;
+            res.json({ exists });
+        }
+    });
+});
+
+app.put('/absence/:PERSMATR/:ABSEDATE', (req, res) => {
+    const { PERSMATR, ABSEDATE } = req.params;
+    const {
+        NAABCODE,
+        NATUDESI,
+        NATUEFFE,
+        ABSEDEHE,
+        ABSEFIHE,
+        ABSENBHR,
+    } = req.body;
+
+    const sql = `
+        UPDATE EXT_RHABSENCES
+        SET NAABCODE = ?, NATUDESI = ?, NATUEFFE = ?, ABSEDEHE = ?, ABSEFIHE = ?, ABSENBHR = ?
+        WHERE PERSMATR = ? AND ABSEDATE = ?
+    `;
+
+    db.query(sql, [NAABCODE, NATUDESI, NATUEFFE, ABSEDEHE, ABSEFIHE, ABSENBHR, PERSMATR, ABSEDATE], (err, results) => {
+        if (err) {
+            console.error('Erreur lors de la mise à jour de l\'absence :', err);
+            res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'absence' });
+        } else {
+            res.json({ message: 'Absence mise à jour avec succès' });
+        }
+    });
+});
+
 
 app.listen(8081,()=>{
     console.log("Listening");

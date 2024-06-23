@@ -58,6 +58,64 @@ const [allDay, setAllDay] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const inputRef = useRef(null);
+  const [absences, setAbsences] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8081/absences')
+      .then(response => response.json())
+      .then(data => setAbsences(data))
+      .catch(error => console.error('Erreur lors de la récupération des absences:', error));
+  }, []);
+
+  const checkAbsence = (persMatr, currentDate) => {
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); 
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const hours = String(currentDate.getHours()).padStart(2, '0');
+    const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+    const seconds = String(currentDate.getSeconds()).padStart(2, '0');
+
+    
+    const currentDateString = new Date(Date.UTC(year, currentDate.getMonth(), day, hours, minutes, seconds)).toISOString();
+
+    console.log('Recherche de l\'absence pour PERSMATR:', persMatr, 'et ABSEDATE:', currentDateString);
+
+    const isDateBetween = (startDate, endDate, date) => {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const current = new Date(date);
+        
+       
+        const startDateNormalized = new Date(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
+        const endDateNormalized = new Date(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate(), 23, 59, 59);
+        const currentDateNormalized = new Date(current.getUTCFullYear(), current.getUTCMonth(), current.getUTCDate());
+
+        return startDateNormalized <= currentDateNormalized && currentDateNormalized <= endDateNormalized;
+    };
+
+    const absence = absences.find(absence => {
+        if (absence.PERSMATR === persMatr && isDateBetween(absence.ABSEDEHE, absence.ABSEFIHE, currentDateString)) {
+            console.log('PERSMATR trouvé:', absence.PERSMATR);
+            return true; 
+        }
+        
+        return false; 
+    });
+
+    if (!absence) {
+        console.log('Aucune absence trouvée pour PERSMATR:', persMatr, 'et ABSEDATE:', currentDateString);
+    }
+
+    return absence ? absence.NAABCODE : null;
+};
+
+
+
+
+
+
+  
+  
 
 
   useEffect(() => {
@@ -357,6 +415,16 @@ else if (selectedOption===null){
     setShowModalHoraire(false);
 };
 
+const fetchData = async () => {
+  try {
+    const response = await fetch('http://localhost:8081/absences');
+    const data = await response.json();
+    setAbsences(data); 
+    console.log('Données rafraîchies avec succès', data);
+  } catch (error) {
+    console.error('Erreur lors du rafraîchissement des données', error);
+  }
+};
 
   
   const fetchUpdatedData = () => {
@@ -373,6 +441,142 @@ else if (selectedOption===null){
       })
       .catch(err => console.log(err));
   };
+
+  const handleFormSubmit2 = () => {
+  if (remplace) {
+    submitWithReplacement();
+    fetchUpdatedData(); 
+  } else {
+    submitWithoutReplacement();
+    fetchUpdatedData(); 
+  }
+};
+
+const checkExistence = async (PERSMATR, ABSEDATE) => {
+  try {
+    const response = await fetch(`http://localhost:8081/absence/exist?PERSMATR=${PERSMATR}&ABSEDATE=${ABSEDATE}`);
+    const result = await response.json();
+    return result.exists; 
+  } catch (error) {
+    console.error('Erreur lors de la vérification de l\'existence', error);
+    return false;
+  }
+};
+
+
+const submitWithReplacement = async () => {
+  const PERSMATR = selectedSalary.PERSMATR;
+  const [NAABCODE, NATUDESI, NATUABRE] = selectedNatuabs.split('-');
+  const NATUEFFE = selectedEffet;
+  const ABSEDEHE = startDate;
+  const ABSEFIHE = endDate;
+  const ABSENBHR = hours.replace(',', '.');
+  const ABSEDATE = startDate;
+  const absenceData = {
+    PERSMATR,
+    NAABCODE,
+    NATUDESI,
+    NATUEFFE,
+    ABSEDEHE,
+    ABSEFIHE,
+    ABSENBHR,
+    ABSEDATE,
+  };
+
+  const exists = await checkExistence(PERSMATR, ABSEDATE);
+
+  try {
+    let response;
+    if (exists) {
+      
+      response = await fetch(`http://localhost:8081/absence/${PERSMATR}/${ABSEDATE}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(absenceData),
+      });
+    } else {
+      
+      response = await fetch('http://localhost:8081/absence', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(absenceData),
+      });
+    }
+
+    const result = await response.json();
+
+    if (response.ok) {
+      console.log('Ligne traitée avec succès', result);
+      await fetchData();
+    } else {
+      console.error('Erreur lors du traitement de la ligne', result);
+    }
+  } catch (error) {
+    console.error('Erreur réseau ou serveur', error);
+  }
+  setShowModalAbsence(false);
+};
+
+const submitWithoutReplacement = async () => {
+  const [NAABCODE, NATUDESI, NATUABRE] = selectedNatuabs.split('-');
+  const PERSMATR = selectedSalary.PERSMATR;
+  const NATUEFFE = selectedEffet;
+  const ABSEDEHE = startDate;
+  const ABSEFIHE = endDate;
+  const ABSENBHR = hours.replace(',', '.');
+  const ABSEDATE = startDate;
+  const absenceData = {
+    PERSMATR,
+    NAABCODE,
+    NATUDESI,
+    NATUEFFE,
+    ABSEDEHE,
+    ABSEFIHE,
+    ABSENBHR,
+    ABSEDATE,
+  };
+
+  const exists = await checkExistence(PERSMATR, ABSEDATE);
+
+  try {
+    let response;
+    if (exists) {
+      
+      response = await fetch(`http://localhost:8081/absence/${PERSMATR}/${ABSEDATE}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(absenceData),
+      });
+    } else {
+      
+      response = await fetch('http://localhost:8081/absence', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(absenceData),
+      });
+    }
+
+    const result = await response.json();
+
+    if (response.ok) {
+      console.log('Ligne traitée avec succès', result);
+      await fetchData();
+    } else {
+      console.error('Erreur lors du traitement de la ligne', result);
+    }
+  } catch (error) {
+    console.error('Erreur réseau ou serveur', error);
+  }
+  setShowModalAbsence(false);
+};
 
   const getDaysInMonth = (month, year) => {
     return new Date(year, month, 0).getDate();
@@ -511,6 +715,33 @@ salaries.forEach(salary => {
   const initialDate = `${annee}-${String(mois).padStart(2, '0')}-${String(selectedDayIndex + 1).padStart(2, '0')}`;
   setStartDate(initialDate);
 }, [selectedPeriodes, mois, annee, selectedDayIndex]);
+
+const getAbsNat = (naabcode) => {
+  switch (naabcode) {
+    case '01':
+      return 'CD';
+    case '02':
+      return 'AA';
+    case '03':
+      return 'ANA';
+    case '04':
+      return 'CA';
+    case '05':
+      return 'CN';
+    case '06':
+      return 'JF';
+    case '07':
+      return 'MAP';
+    case '08':
+      return 'CM';
+    case '09':
+      return 'AM';
+    case '10':
+      return 'AT';
+    default:
+      return null;
+  }
+};
 
 
 
@@ -697,7 +928,7 @@ salaries.forEach(salary => {
           </thead>
           
           <tbody>
-  {uniqueValuesArray.map((entry, index) => (
+          {uniqueValuesArray.map((entry, index) => (
     <tr key={index}>
       <td style={{ fontSize: '15px' }}>
         {entry.PERSMATR}/-{entry.PERSNOPE} {entry.PERSPRPE}
@@ -706,13 +937,31 @@ salaries.forEach(salary => {
         {entry.LIBEABR}
       </td>
       {Array.from({ length: daysInMonth }, (_, i) => {
-        const currentDate = new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1);
-        const currentDateString = currentDate.toISOString().slice(0, 10); 
-        const matchingIndex = entry.PLANDATE.findIndex(date => date.slice(0, 10) === currentDateString);
-        const matchingValue = matchingIndex !== -1 ? entry.values[matchingIndex] : null;
-        return (
-          <td key={i + 1} style={{ textAlign: 'center', color: getColor(matchingValue), fontWeight: 'bolder' }} onContextMenu={(e) => handleRightClick(e, i, index, matchingValue)} className='tdtable' onClick={(e) => handleCellClick(e, entry, i,matchingValue )}>
-            {getText(matchingValue)}
+  const currentDate = new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1);
+  const currentDateString = currentDate.toISOString().slice(0, 10); 
+  const matchingIndex = entry.PLANDATE.findIndex(date => date.slice(0, 10) === currentDateString);
+  const matchingValue = matchingIndex !== -1 ? entry.values[matchingIndex] : null;
+  const absence = checkAbsence(entry.PERSMATR, currentDate);
+
+  console.log('currentDateString:', currentDateString);
+  console.log('PERSMATR:', entry.PERSMATR);
+  console.log('matchingValue:', matchingValue);
+  console.log('absence:', absence);
+  console.log('currentDate:', currentDate);
+
+  const cellValue = absence !== null ? getAbsNat(absence)  : getText(matchingValue);
+  
+  console.log('cellValue:', cellValue);
+
+  return (
+    <td 
+      key={i + 1} 
+      style={{ textAlign: 'center', color: getColor(matchingValue), fontWeight: 'bolder' }} 
+      onContextMenu={(e) => handleRightClick(e, i, index, matchingValue)} 
+      className='tdtable' 
+      onClick={(e) => handleCellClick(e, entry, i, matchingValue)}
+    >
+      {cellValue}
            
             {showListModal && tdKey === i && trKey === index && matchingValue ? 
               <div className="liste" ref={listModalRef}>
@@ -954,7 +1203,7 @@ salaries.forEach(salary => {
         
         </div> 
         <div className='buttonsabs'>
-        <button className='buttonvabs'  onClick={handleFormSubmit}>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonfabs'  onClick={handleCancel}>Fermer <FontAwesomeIcon icon={faTimes} /></button>
+        <button className='buttonvabs'  onClick={handleFormSubmit2}>Valider <FontAwesomeIcon icon={faCheck} /></button><button className='buttonfabs'  onClick={handleCancel}>Fermer <FontAwesomeIcon icon={faTimes} /></button>
         </div>
         </div>
         </div> : ''}
