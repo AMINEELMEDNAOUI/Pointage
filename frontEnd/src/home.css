@@ -271,11 +271,8 @@ table td{
   color: green;
   font-weight: bolder;
 }
-.horbutt{
-  position: absolute;
-  top:91%;
-  left:69%;
-}
+
+
 .buttonsabs{
   position: absolute;
   top: 90%;
@@ -764,44 +761,37 @@ label[for="horaireSelect"] {
         margin: 0;
         size: auto;
     }
-
-      @media print {
+    
+    @media print {
         body {
-          margin: 0;
-          padding: 0;
-        
-          
-      }
+            margin: 0;
+            padding: 0;
+        }
         .select-container {
             flex-direction: column;
-            
         }
-       .pcvc-container{
-        position: absolute;
-       }
-       .period-container{
-        position: absolute;
-        top: 13%;
-       }
-       .table-c{
-        position: absolute;
-        top: 22%;
-        
-       
-       }
-       table {
-        page-break-inside: auto;
-        
+        .pcvc-container {
+            position: absolute;
+        }
+        .period-container {
+            position: absolute;
+            top: 13%;
+        }
+        .table-c {
+            position: absolute;
+            top: 22%;
+        }
+        table {
+            page-break-inside: auto;
+        }
+        thead {
+            display: table-header-group; /* Assure que l'en-tête se répète */
+        }
+        tr {
+            page-break-inside: avoid; /* Empêche la rupture de page à l'intérieur des lignes */
+        }
     }
-
-    thead {
-        display: table-header-group; /* Assure que l'en-tête se répète */
-    }
-
-    tr {
-        page-break-inside: avoid; /* Empêche la rupture de page à l'intérieur des lignes */
-    }
-    }
+    
 
       
 

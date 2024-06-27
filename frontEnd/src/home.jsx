@@ -1,5 +1,6 @@
 import React, { useState, useEffect ,useRef } from 'react';
 import './home.css';
+import jsPDF from 'jspdf';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPrint } from '@fortawesome/free-solid-svg-icons';
 import { faWater } from '@fortawesome/free-solid-svg-icons';
@@ -10,6 +11,7 @@ import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { faTimes ,faExpand, faCompress ,faClock } from '@fortawesome/free-solid-svg-icons';
 import { Select } from 'antd';
 const { Option } = Select;
+
 
 
 
@@ -115,7 +117,13 @@ const [allDay, setAllDay] = useState(false);
 
 
   
-  
+const generatePDF = () => {
+  const doc = new jsPDF();
+  doc.text('Hello world!', 10, 10);
+  doc.addPage();
+  doc.text('This is another page.', 10, 10);
+  doc.save('document.pdf');
+};
 
 
   useEffect(() => {
@@ -244,6 +252,7 @@ const [allDay, setAllDay] = useState(false);
     setSalariesDisp([]);
   }
   if(selectedOption==='allAvailability'){
+    const [pole, npole] = selectedPoles.split('-');
     
     const [MONTH, YEAR] = selectedPeriodes.split('-');
     
@@ -251,7 +260,7 @@ const [allDay, setAllDay] = useState(false);
     const formattedDate = `${YEAR}-${MONTH.padStart(2, '0')}-${selectedDay}`;
     const initialDate = `${YEAR}-${String(MONTH).padStart(2, '0')}-${String(selectedDayIndex + 1).padStart(2, '0')}`;
 
-    fetch(`http://localhost:8081/salariesdisptd?&MONTH=${MONTH}&YEAR=${YEAR}&startDate=${startDate}&endDate=${endDate}&startTime=${startTime}&endTime=${endTime}`)
+    fetch(`http://localhost:8081/salariesdisptd?&pole=${pole}&startDate=${startDate}&endDate=${endDate}&pole=${pole}`)
         .then(res => res.json())
         .then(data => {
             console.log('Received data:', data);
@@ -652,6 +661,16 @@ salaries.forEach(salary => {
   const handleCancel = () => {
     setShowModalHoraire(false);
     setShowModalAbsence(false); 
+    setSelectedNatuabs('');
+    setSelectedEffet('');
+    setStartTime('07:00');
+    setEndTime('19:00');
+    setHours('12,00');
+   setRemplace(false);
+  setSelectedOption(null);
+  setSalariesDisp([]);
+  setSearchTerm('');
+  setSelectedEmployee(null);
   };
 
   const handleRightClick=(e,i,index,v)=> {
@@ -714,34 +733,53 @@ salaries.forEach(salary => {
   
   const initialDate = `${annee}-${String(mois).padStart(2, '0')}-${String(selectedDayIndex + 1).padStart(2, '0')}`;
   setStartDate(initialDate);
+  setEndDate(initialDate);
 }, [selectedPeriodes, mois, annee, selectedDayIndex]);
 
-const getAbsNat = (naabcode) => {
+const getAbsNat = (naabcode, color) => {
+  let text;
   switch (naabcode) {
     case '01':
-      return 'CD';
+      text = 'CD';
+      break;
     case '02':
-      return 'AA';
+      text = 'AA';
+      break;
     case '03':
-      return 'ANA';
+      text = 'ANA';
+      break;
     case '04':
-      return 'CA';
+      text = 'CA';
+      break;
     case '05':
-      return 'CN';
+      text = 'CN';
+      break;
     case '06':
-      return 'JF';
+      text = 'JF';
+      break;
     case '07':
-      return 'MAP';
+      text = 'MAP';
+      break;
     case '08':
-      return 'CM';
+      text = 'CM';
+      break;
     case '09':
-      return 'AM';
+      text = 'AM';
+      break;
     case '10':
-      return 'AT';
+      text = 'AT';
+      break;
     default:
-      return null;
+      text = null;
+  }
+
+  if (text !== null) {
+    return <span style={{ color: color }}>{text}</span>;
+  } else {
+    return null;
   }
 };
+
 
 
 
@@ -757,7 +795,8 @@ const getAbsNat = (naabcode) => {
  
   return (
     <>
-    {selectedClientsId}{selectedSitesId}{selectedPoles}
+       
+     
       <p className='header-title'>Pointage - Cycles par chantier</p>
       <div className='select-container'>
         <div className="pcvc-container">
@@ -946,10 +985,9 @@ const getAbsNat = (naabcode) => {
   console.log('currentDateString:', currentDateString);
   console.log('PERSMATR:', entry.PERSMATR);
   console.log('matchingValue:', matchingValue);
-  console.log('absence:', absence);
-  console.log('currentDate:', currentDate);
+  
 
-  const cellValue = absence !== null ? getAbsNat(absence)  : getText(matchingValue);
+  const cellValue = absence !== null ? getAbsNat(absence, "black")  : getText(matchingValue);
   
   console.log('cellValue:', cellValue);
 

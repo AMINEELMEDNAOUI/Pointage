@@ -243,39 +243,9 @@ app.get('/salariesdisptd', (req, res) => {
 
     if (pole === '1122') {
         
-        sql = `SELECT DISTINCT PL.PERSMATR, P.PERSNOPE, P.PERSPRPE, P.PERSNCIN
-            FROM EXT_RHPLANNIN PL
-            JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR
-            JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT
-            WHERE MONTH(PL.PLANDATE) = '${MONTH}'
-              AND YEAR(PL.PLANDATE) = '${YEAR}'
-              AND PL.PERSMATR IN (
-                  SELECT sal.PERSMATR
-                  FROM EXT_RHPERSONNES AS sal
-                  LEFT JOIN EXT_RHPLANNIN AS pla ON sal.PERSMATR = pla.PERSMATR
-                                               AND pla.PLANDATE BETWEEN '${startDate}' AND '${endDate}'
-                                               AND (
-                                                   (pla.PLANDEHE <= '${startTime}' AND pla.PLANFIHE >= '${endTime}') OR
-                                                   (pla.PLANDEHE >= '${startTime}' AND pla.PLANDEHE < '${endTime}') OR
-                                                   (pla.PLANFIHE > '${startTime}' AND pla.PLANFIHE <= '${endTime}')
-                                               )
-                  WHERE pla.PERSMATR IS NULL
-              );`;
+        sql = `SELECT PERSMATR ,PERSPRPE,PERSNOPE,PERSNCIN FROM EXT_RHPERSONNES WHERE CODSTA04='${pole}' AND PERSMATR NOT IN (SELECT PERSMATR FROM EXT_RHPLANNIN WHERE PLANDATE BETWEEN '${startDate}' AND '${endDate}' AND STATNATURE='${pole}');`;
     } else {
-        sql = `SELECT DISTINCT PL.PERSMATR, P.PERSNOPE, P.PERSPRPE, P.PERSNCIN
-        FROM EXT_RHPLANNIN PL
-        JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR
-        JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT
-        WHERE MONTH(PL.PLANDATE) = '${MONTH}'
-          AND YEAR(PL.PLANDATE) = '${YEAR}'
-          AND PL.PERSMATR IN (
-              SELECT sal.PERSMATR
-              FROM EXT_RHPERSONNES AS sal
-              LEFT JOIN EXT_RHPLANNIN AS pla ON sal.PERSMATR = pla.PERSMATR
-                                           AND pla.PLANDATE BETWEEN '${startDate}' AND '${endDate}'
-                                          
-              WHERE pla.PERSMATR IS NULL
-          );`;
+        sql = `SELECT PERSMATR ,PERSPRPE,PERSNOPE,PERSNCIN FROM EXT_RHPERSONNES WHERE CODSTA04='${pole}' AND PERSMATR NOT IN (SELECT PERSMATR FROM EXT_RHPLANNIN WHERE PLANDATE BETWEEN '${startDate}' AND '${endDate}' AND STATNATURE='${pole}');`;
     }
 
     db.query(sql, (err, data) => {
