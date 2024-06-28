@@ -501,7 +501,7 @@ const insertEmployee = async () => {
   const [CLIENT, CNAME] = selectedClientsId.split('-');
   const [CHANTIER, SNAME] = selectedSitesId.split('-');
   const [POLE, npole] = selectedPoles.split('-');
-  const PLANNBHE = parseFloat(hours.replace(',', '.')) + 0.000000;
+  const PLANNBHE = parseFloat(hours.replace(',', '.')).toFixed(6).replace('.', ',');
   const PLANDEHE = startTime;
   const PLANFIHE = endTime;
   
@@ -925,6 +925,25 @@ const handleEndTimeChange = (e) => {
   const validatedTime = validateTime(time, min, max);
   setEndTime(validatedTime);
 };
+
+const defaultValues = (planpajo) => {
+  if (planpajo === 1) {
+    setStartTime('07:00');
+    setEndTime('19:00');
+  } else if (planpajo === 2) {
+    setStartTime('19:00');
+    setEndTime('06:00');
+  } else {
+    
+    setStartTime('07:00');
+    setEndTime('19:00');
+  }
+};
+
+
+useEffect(() => {
+  defaultValues(selectedValue);
+}, [selectedValue]);
  
   return (
     <>
