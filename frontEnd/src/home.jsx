@@ -80,7 +80,7 @@ const [allDay, setAllDay] = useState(false);
     
     const currentDateString = new Date(Date.UTC(year, currentDate.getMonth(), day, hours, minutes, seconds)).toISOString();
 
-    console.log('Recherche de l\'absence pour PERSMATR:', persMatr, 'et ABSEDATE:', currentDateString);
+   
 
     const isDateBetween = (startDate, endDate, date) => {
         const start = new Date(startDate);
@@ -97,7 +97,7 @@ const [allDay, setAllDay] = useState(false);
 
     const absence = absences.find(absence => {
         if (absence.PERSMATR === persMatr && isDateBetween(absence.ABSEDEHE, absence.ABSEFIHE, currentDateString)) {
-            console.log('PERSMATR trouvé:', absence.PERSMATR);
+           
             return true; 
         }
         
@@ -105,7 +105,7 @@ const [allDay, setAllDay] = useState(false);
     });
 
     if (!absence) {
-        console.log('Aucune absence trouvée pour PERSMATR:', persMatr, 'et ABSEDATE:', currentDateString);
+        
     }
 
     return absence ? absence.NAABCODE : null;
@@ -235,8 +235,8 @@ const generatePDF = () => {
       const selectedDay = (parseInt(selectedDayIndex) + 1).toString().padStart(2, '0');
       const formattedDate = `${YEAR}-${MONTH.padStart(2, '0')}-${selectedDay}`;
       const initialDate = `${YEAR}-${String(MONTH).padStart(2, '0')}-${String(selectedDayIndex + 1).padStart(2, '0')}`;
-      console.log(startDate);
-      console.log(endDate);
+      
+    
       fetch(`http://localhost:8081/salariesdispmp?TIRID=${TIRID}&MONTH=${MONTH}&YEAR=${YEAR}&startDate=${startDate}&endDate=${endDate}&startTime=${startTime}&endTime=${endTime}&pole=${pole}`)
           .then(res => res.json())
           .then(data => {
@@ -372,14 +372,31 @@ else if (selectedOption===null){
     if (!allDay) {
       const start = new Date(`1970-01-01T${startTime}:00`);
       const end = new Date(`1970-01-01T${endTime}:00`);
-      const diff = (end - start) / (1000 * 60 * 60);
-      setHours(diff.toFixed(2).replace('.', ','));
+  
+      
+      let startMs = start.getTime();
+      let endMs = end.getTime();
+  
+      
+      if (endMs < startMs) {
+        endMs += 24 * 60 * 60 * 1000; 
+      }
+  
+      
+      let diffHours = (endMs - startMs) / (1000 * 60 * 60);
+  
+      
+      setHours(diffHours.toFixed(2).replace('.', ','));
+  
     } else {
+     
       setStartTime('07:00');
       setEndTime('19:00');
       setHours('12,00');
     }
   }, [startTime, endTime, allDay]);
+  
+  
 
   const handleFormSubmit = event => {
     event.preventDefault();
@@ -473,6 +490,62 @@ const checkExistence = async (PERSMATR, ABSEDATE) => {
 };
 
 
+
+const insertEmployee = async () => {
+  const PLANDATE = startDate;
+  const PLANDATE2 = endDate;
+  const PERSMATR = selectedSalary.PERSMATR;
+  const PERSMATR2 = selectedEmployee.PERSMATR;
+  const PERSNOPE = selectedEmployee.PERSNOPE;
+  const PERSPRPE = selectedEmployee.PERSPRPE;
+  const [CLIENT, CNAME] = selectedClientsId.split('-');
+  const [CHANTIER, SNAME] = selectedSitesId.split('-');
+  const [POLE, npole] = selectedPoles.split('-');
+  const PLANNBHE = parseFloat(hours.replace(',', '.')) + 0.000000;
+  const PLANDEHE = startTime;
+  const PLANFIHE = endTime;
+  
+
+  const remplaceData = {
+    PERSMATR2,
+    PLANDATE,
+    PLANDATE2,
+    PERSNOPE,
+    PERSPRPE,
+    PLANNBHE,
+    PLANDEHE,
+    PLANFIHE,
+    PERSMATR,
+    POLE,
+    CLIENT,
+    CHANTIER,
+  };
+
+  try {
+    const response = await fetch('http://localhost:8081/insertEmployee', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(remplaceData),
+    });
+
+    if (!response.ok) {
+      console.error('Erreur lors de l\'insertion de l\'employé:', response.statusText);
+      throw new Error('Erreur lors de l\'insertion de l\'employé');
+    }
+
+    const result = await response.json();
+    console.log('Insertion de l\'employé traitée avec succès', result);
+    await fetchData();
+    fetchUpdatedData();
+  } catch (error) {
+    console.error('Erreur lors de l\'insertion de l\'employé:', error.message);
+    throw error;
+  }
+};
+
+
 const submitWithReplacement = async () => {
   const PERSMATR = selectedSalary.PERSMATR;
   const [NAABCODE, NATUDESI, NATUABRE] = selectedNatuabs.split('-');
@@ -481,6 +554,9 @@ const submitWithReplacement = async () => {
   const ABSEFIHE = endDate;
   const ABSENBHR = hours.replace(',', '.');
   const ABSEDATE = startDate;
+
+  
+
   const absenceData = {
     PERSMATR,
     NAABCODE,
@@ -497,7 +573,6 @@ const submitWithReplacement = async () => {
   try {
     let response;
     if (exists) {
-      
       response = await fetch(`http://localhost:8081/absence/${PERSMATR}/${ABSEDATE}`, {
         method: 'PUT',
         headers: {
@@ -506,7 +581,6 @@ const submitWithReplacement = async () => {
         body: JSON.stringify(absenceData),
       });
     } else {
-      
       response = await fetch('http://localhost:8081/absence', {
         method: 'POST',
         headers: {
@@ -516,20 +590,26 @@ const submitWithReplacement = async () => {
       });
     }
 
-    const result = await response.json();
-
-    if (response.ok) {
-      console.log('Ligne traitée avec succès', result);
-      await fetchData();
-    } else {
-      console.error('Erreur lors du traitement de la ligne', result);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Erreur lors du traitement de l\'absence:', errorText);
+      throw new Error(errorText);
     }
+
+    const result = await response.json();
+    console.log('Absence traitée avec succès', result);
+
+  
+    await insertEmployee();
+
+    await fetchData();  
+    console.log('Ligne traitée avec succès');
   } catch (error) {
-    console.error('Erreur réseau ou serveur', error);
+    console.error('Erreur lors du traitement de la ligne:', error.message);
   }
+
   setShowModalAbsence(false);
 };
-
 const submitWithoutReplacement = async () => {
   const [NAABCODE, NATUDESI, NATUABRE] = selectedNatuabs.split('-');
   const PERSMATR = selectedSalary.PERSMATR;
@@ -791,12 +871,65 @@ const getAbsNat = (naabcode, color) => {
  const contentStylediv = isMaximized ? { height:'350px' } : {};
  const contentStylepe = isMaximized ? { fontSize:'22px' ,marginRight:'1025px' } : {};
 
+
  
+ const getMinMaxTimes = (planpajo) => {
+  if (planpajo === 1) {
+    return { min: '06:00', max: '19:00' };
+  } else if (planpajo === 2) {
+    return { min: '19:00', max: '06:00' };
+  }
+  return { min: '00:00', max: '23:59' }; 
+};
+
+const { min, max } = getMinMaxTimes(selectedValue);
+
+const parseTime = (time) => {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+const validateTime = (time, min, max) => {
+
+  const parsedTime = parseTime(time);
+  const parsedMin = parseTime(min);
+  const parsedMax = parseTime(max);
+
+
+  if (parsedMin > parsedMax) {
+   
+    if (parsedTime >= parsedMin || parsedTime <= parsedMax) {
+      return time;
+    } else {
+      return min; 
+    }
+  } else {
+  
+    if (parsedTime >= parsedMin && parsedTime <= parsedMax) {
+      return time; 
+    } else {
+      return min;
+    }
+  }
+};
+
+
+const handleStartTimeChange = (e) => {
+  const time = e.target.value;
+  const validatedTime = validateTime(time, min, max);
+  setStartTime(validatedTime);
+};
+
+const handleEndTimeChange = (e) => {
+  const time = e.target.value;
+  const validatedTime = validateTime(time, min, max);
+  setEndTime(validatedTime);
+};
  
   return (
     <>
+      
        
-     
       <p className='header-title'>Pointage - Cycles par chantier</p>
       <div className='select-container'>
         <div className="pcvc-container">
@@ -982,14 +1115,11 @@ const getAbsNat = (naabcode, color) => {
   const matchingValue = matchingIndex !== -1 ? entry.values[matchingIndex] : null;
   const absence = checkAbsence(entry.PERSMATR, currentDate);
 
-  console.log('currentDateString:', currentDateString);
-  console.log('PERSMATR:', entry.PERSMATR);
-  console.log('matchingValue:', matchingValue);
-  
+ 
 
   const cellValue = absence !== null ? getAbsNat(absence, "black")  : getText(matchingValue);
   
-  console.log('cellValue:', cellValue);
+  
 
   return (
     <td 
@@ -1099,20 +1229,23 @@ const getAbsNat = (naabcode, color) => {
           <input className='starttime'
             type="time"
             value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
+            onChange={handleStartTimeChange}
+            min={min}
+            max={max}
             disabled={allDay}
           />
-          </div>
-        </label>
-        
-       
-        <label>
+        </div>
+      </label>
+
+      <label>
         <div className="pinend">
-        <p className='pa'> à </p>
+          <p className='pa'> à </p>
           <input className='endtime'
             type="time"
             value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
+            onChange={handleEndTimeChange}
+            min={min}
+            max={max}
             disabled={allDay}
           />
           </div>

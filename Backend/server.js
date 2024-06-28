@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const moment = require('moment');
 
 const app = express()
 app.use(cors())
@@ -350,6 +351,88 @@ app.put('/absence/:PERSMATR/:ABSEDATE', (req, res) => {
             res.json({ message: 'Absence mise à jour avec succès' });
         }
     });
+});
+
+
+const getDatesBetween = (startDate, endDate) => {
+    let dates = [];
+    let currentDate = moment(startDate);
+    let stopDate = moment(endDate);
+  
+    while (currentDate <= stopDate) {
+      dates.push(currentDate.format('YYYY-MM-DD'));
+      currentDate = currentDate.add(1, 'days');
+    }
+  
+    return dates;
+  };
+  
+  
+  
+
+
+
+  app.post('/insertEmployee', (req, res) => {
+
+    const {
+        PERSMATR, PLANDATE, PLANDATE2, PERSNOPE, PERSPRPE,
+        PLANNBHE, PLANDEHE, PLANFIHE,
+        PERSMATR2, POLE, CLIENT, CHANTIER
+    } = req.body;
+
+    if (!PERSMATR || !PLANDATE || !PERSNOPE || !PERSPRPE || !PLANNBHE || !PLANDEHE || !PLANFIHE || !PERSMATR2 || !POLE || !CLIENT || !CHANTIER) {
+        return res.status(400).json({ error: 'Tous les champs requis doivent être fournis.' });
+    }
+
+    
+
+    const dates = getDatesBetween(PLANDATE, PLANDATE2);
+
+    const insertQuery = `
+    INSERT INTO EXT_RHPLANNIN (
+      PERSMATR, PLANDATE, PERSNOPE, PERSPRPE,
+      PLANPAJO, PLANNBHE, PLANDEHE, PLANFIHE,
+      PLANJOUR, PLANSEMA, PLANETPL,
+      PLANBAJO, PERICODE, PLANCLPA, PLANCLMC,
+      PLANPLCM, PLANCLFI, ETATVALI, ETATCLOT,
+      STATZONE, TIRID, TIRCODE, ADRID, PCVID,
+      GENUMCYC, GENECLPA, PCVNUM, ARTID, STATCLAS,
+      STATNATURE, VILLCODE, IDENTECYCL, ETATCONS
+    )
+    SELECT
+      ?, ?, ?, ?,
+      PLANPAJO, ?, ?, ?,
+      PLANJOUR, PLANSEMA, PLANETPL,
+      PLANBAJO, PERICODE, PLANCLPA, PLANCLMC,
+      PLANPLCM, PLANCLFI, ETATVALI, ETATCLOT,
+      STATZONE, TIRID, TIRCODE, ADRID, PCVID,
+      GENUMCYC, GENECLPA, PCVNUM, ARTID, STATCLAS,
+      STATNATURE, VILLCODE, IDENTECYCL, ETATCONS
+    FROM
+      EXT_RHPLANNIN
+    WHERE
+      PERSMATR = ? AND PLANDATE BETWEEN ? AND ? AND STATNATURE = ? AND TIRID=? AND ADRID=?;
+  `;
+
+    
+    dates.forEach((date) => {
+        db.query(
+            insertQuery,
+            [
+                PERSMATR2, date, PERSNOPE, PERSPRPE,
+                 PLANNBHE, PLANDEHE, PLANFIHE,
+                PERSMATR, PLANDATE , PLANDATE2,POLE, CLIENT, CHANTIER
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    console.error('Erreur lors de l\'insertion du salarié:', error);
+                    return res.status(500).json({ error: 'Erreur lors de l\'insertion du salarié' });
+                }
+            }
+        );
+    });
+
+    res.status(200).json({ message: 'Insertion réussie pour toutes les dates spécifiées.' });
 });
 
 
