@@ -472,9 +472,29 @@ const fetchData = async () => {
   if (remplace) {
     submitWithReplacement();
     fetchUpdatedData(); 
+    setSelectedNatuabs('');
+    setSelectedEffet('');
+    setStartTime('07:00');
+    setEndTime('19:00');
+    setHours('12,00');
+   setRemplace(false);
+  setSelectedOption(null);
+  setSalariesDisp([]);
+  setSearchTerm('');
+  setSelectedEmployee(null);
   } else {
     submitWithoutReplacement();
     fetchUpdatedData(); 
+    setSelectedNatuabs('');
+    setSelectedEffet('');
+    setStartTime('07:00');
+    setEndTime('19:00');
+    setHours('12,00');
+   setRemplace(false);
+  setSelectedOption(null);
+  setSalariesDisp([]);
+  setSearchTerm('');
+  setSelectedEmployee(null);
   }
 };
 
