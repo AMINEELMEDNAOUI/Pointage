@@ -751,29 +751,52 @@ const submitWithoutReplacement = async () => {
 
   const uniqueValuesArray = [];
 
-salaries.forEach(salary => {
-    const isSameGroup = (item) => 
-        item.PERSMATR === salary.PERSMATR && 
-        item.PERSNOPE === salary.PERSNOPE &&
-        item.PERSPRPE === salary.PERSPRPE &&
-        item.LIBEABR === salary.LIBEABR;
+  salaries.forEach(salary => {
+      // Vérifie si une entrée avec les mêmes critères existe déjà dans uniqueValuesArray
+      const isSameGroup = (item) => 
+          item.PERSMATR === salary.PERSMATR && 
+          item.PERSNOPE === salary.PERSNOPE &&
+          item.PERSPRPE === salary.PERSPRPE &&
+          item.LIBEABR === salary.LIBEABR;
+  
+      // Recherche une entrée existante qui correspond
+      let entry = uniqueValuesArray.find(isSameGroup);
+  
+      // Si aucune entrée n'est trouvée, en créer une nouvelle
+      if (!entry) {
+          entry = {
+              PERSMATR: salary.PERSMATR,
+              PERSNOPE: salary.PERSNOPE,
+              PERSPRPE: salary.PERSPRPE,
+              LIBEABR: salary.LIBEABR,
+              PLANDATE: [],
+              values: [],
+              totalHours: 0,  // Initialisation du total des heures
+              totalDays: 0    // Initialisation du total des jours
+          };
+          uniqueValuesArray.push(entry); // Ajout de la nouvelle entrée à uniqueValuesArray
+      }
+  
+      // Ajout des données spécifiques du salarié à l'entrée trouvée ou créée
+      entry.PLANDATE.push(salary.PLANDATE); // Ajout de la date de planification
+      entry.values.push(salary.PLANPAJO);   
 
-    let entry = uniqueValuesArray.find(isSameGroup);
-    
-    if (!entry) {
-        entry = {
-            PERSMATR: salary.PERSMATR,
-            PERSNOPE: salary.PERSNOPE,
-            PERSPRPE: salary.PERSPRPE,
-            LIBEABR: salary.LIBEABR,
-            PLANDATE: [],
-            values: []
-        };
-        uniqueValuesArray.push(entry);
-    }
-    entry.PLANDATE.push(salary.PLANDATE); 
-    entry.values.push(salary.PLANPAJO);
-});
+      const plandate = new Date(salary.PLANDATE);
+  
+      // Vérifier s'il y a une absence pour ce salarié avant d'ajouter les totaux
+        if (!checkAbsence(salary.PERSMATR, plandate)) {
+          entry.totalHours += parseFloat(salary.PLANNBHE.replace(',', '.')); // Ajout des heures
+          entry.totalDays += parseFloat(salary.NBREJR); // Ajout des jours
+       }
+  
+      // Affichage des informations pour vérification
+      console.log(`Salary: PERSMATR=${salary.PERSMATR}, PLANDATE=${salary.PLANDATE}, PLANPAJO=${salary.PLANPAJO}`);
+      console.log(`Entry after update:`, entry);
+  });
+  
+  console.log(`Unique values array after processing:`, uniqueValuesArray);
+
+  
 
 
   const getColor = (value) => {
@@ -1242,36 +1265,39 @@ const filteredValuesArray = sortedValuesArray.filter(entry =>
       <td key={i + 1} style={{ width: '40px' }}>
         {getDayAbbreviation(new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1).getDay())}
       </td>
+      
     ))}
+    <td>Nbre d'heures </td>
+    <td>Nbre de jours</td>
   </tr>
 </thead>
-          <tbody>
-            {filteredValuesArray.map((entry, index) => (
-              <tr key={index}>
-                <td style={{ fontSize: '15px' }}>
-                  {entry.PERSNOPE} {entry.PERSPRPE}
-                </td>
-                <td>{entry.PERSMATR}</td>
-                <td style={{ textAlign: 'center' }}>
-                  {entry.LIBEABR}
-                </td>
-                {Array.from({ length: daysInMonth }, (_, i) => {
-                  const currentDate = new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1);
-                  const currentDateString = currentDate.toISOString().slice(0, 10); 
-                  const matchingIndex = entry.PLANDATE.findIndex(date => date.slice(0, 10) === currentDateString);
-                  const matchingValue = matchingIndex !== -1 ? entry.values[matchingIndex] : null;
-                  const absence = checkAbsence(entry.PERSMATR, currentDate);
-                  const cellValue = absence !== null ? getAbsNat(absence, "black") : getText(matchingValue);
-                  return (
-                    <td 
-                      key={i + 1} 
-                      style={{ textAlign: 'center', color: getColor(matchingValue), fontWeight: 'bolder' }} 
-                      onContextMenu={(e) => handleRightClick(e, i, index, matchingValue)} 
-                      className='tdtable' 
-                      onClick={(e) => handleCellClick(e, entry, i, matchingValue)}
-                    >
-                      {cellValue}
-           
+<tbody>
+  {filteredValuesArray.map((entry, index) => (
+    <tr key={index}>
+      <td style={{ fontSize: '15px' }}>
+        {entry.PERSNOPE} {entry.PERSPRPE}
+      </td>
+      <td>{entry.PERSMATR}</td>
+      <td style={{ textAlign: 'center' }}>
+        {entry.LIBEABR}
+      </td>
+      {Array.from({ length: daysInMonth }, (_, i) => {
+        const currentDate = new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1);
+        const currentDateString = currentDate.toISOString().slice(0, 10); 
+        const matchingIndex = entry.PLANDATE.findIndex(date => date.slice(0, 10) === currentDateString);
+        const matchingValue = matchingIndex !== -1 ? entry.values[matchingIndex] : null;
+        const absence = checkAbsence(entry.PERSMATR, currentDate);
+        const cellValue = absence !== null ? getAbsNat(absence, "black") : getText(matchingValue);
+        return (
+          <td 
+            key={i + 1} 
+            style={{ textAlign: 'center', color: getColor(matchingValue), fontWeight: 'bolder' }} 
+            onContextMenu={(e) => handleRightClick(e, i, index, matchingValue)} 
+            className='tdtable' 
+            onClick={(e) => handleCellClick(e, entry, i, matchingValue)}
+          >
+            {cellValue}
+
             {showListModal && tdKey === i && trKey === index && matchingValue ? 
               <div className="liste" ref={listModalRef}>
                 <p className='pliste1' onClick={(e) => handleChangeHoraire(e)}>Modifier Horaire</p> 
@@ -1282,9 +1308,20 @@ const filteredValuesArray = sortedValuesArray.filter(entry =>
           </td>
         );
       })}
+      
+      {/* Colonne Nombre d'heures travaillées */}
+      <td style={{ textAlign: 'center', fontWeight: 'bolder' }}>
+        {entry.totalHours.toFixed(2)} {/* Assurez-vous que les heures sont affichées avec deux décimales */}
+      </td>
+
+      {/* Colonne Nombre de jours travaillés */}
+      <td style={{ textAlign: 'center', fontWeight: 'bolder' }}>
+        {entry.totalDays.toFixed(2)} {/* Assurez-vous que les jours sont affichés avec deux décimales */}
+      </td>
     </tr>
   ))}
 </tbody>
+
 
         </table>
       </div>
