@@ -411,29 +411,65 @@ const getDatesBetween = (startDate, endDate) => {
     FROM
       EXT_RHPLANNIN
     WHERE
-      PERSMATR = ? AND PLANDATE BETWEEN ? AND ? AND STATNATURE = ? AND TIRID=? AND ADRID=?;
+      PERSMATR = ? AND PLANDATE= ? AND STATNATURE = ? AND TIRID=? AND ADRID=?;
   `;
 
     
-    dates.forEach((date) => {
-        db.query(
-            insertQuery,
-            [
-                PERSMATR2, date, PERSNOPE, PERSPRPE,
-                 PLANNBHE, PLANDEHE, PLANFIHE,
-                PERSMATR, PLANDATE , PLANDATE2,POLE, CLIENT, CHANTIER
-            ],
-            (error, results, fields) => {
-                if (error) {
-                    console.error('Erreur lors de l\'insertion du salarié:', error);
-                    return res.status(500).json({ error: 'Erreur lors de l\'insertion du salarié' });
+  dates.forEach((date) => {
+    const checkExistenceQuery = `
+        SELECT COUNT(*) AS count 
+        FROM EXT_RHPLANNIN 
+        WHERE PERSMATR = ? AND PLANDATE = ? AND STATNATURE = ? AND TIRID = ? AND ADRID = ?;
+    `;
+
+    db.query(checkExistenceQuery, [PERSMATR2, date, POLE, CLIENT, CHANTIER], (error, results, fields) => {
+        if (error) {
+            console.error('Erreur lors de la vérification de l\'existence:', error);
+            return res.status(500).json({ error: 'Erreur lors de la vérification de l\'existence' });
+        }
+
+        const count = results[0].count;
+
+        console.log(`Nombre de lignes trouvées pour ${date} /${PERSMATR2}/${POLE}/${CLIENT}/${CHANTIER}: ${count}`); 
+
+        if (count === 0) {
+           
+            db.query(
+                insertQuery,
+                [PERSMATR2, date, PERSNOPE, PERSPRPE, PLANNBHE, PLANDEHE, PLANFIHE, PERSMATR, date, POLE, CLIENT, CHANTIER],
+                (insertError, insertResults, insertFields) => {
+                    if (insertError) {
+                        console.error('Erreur lors de l\'insertion du salarié:', insertError);
+                        return res.status(500).json({ error: 'Erreur lors de l\'insertion du salarié' });
+                    }
                 }
-            }
-        );
+            );
+        }
     });
+});
+
 
     res.status(200).json({ message: 'Insertion réussie pour toutes les dates spécifiées.' });
 });
+
+
+
+app.get('/heures', (req, res) => {
+    const PERSMATR = req.query.PERSMATR; 
+    const PLANDATE = req.query.PLANDATE; 
+    const pole =req.query.pole ;
+    const TIRID = req.query.TIRID ;
+    const ADRID = req.query.ADRID;
+    const sql =  `
+            SELECT PLANDEHE, PLANFIHE, PLANNBHE
+            FROM EXT_RHPLANNIN
+            WHERE PERSMATR = '${PERSMATR}' AND PLANDATE = '${PLANDATE}' AND STATNATURE = '${pole}' AND TIRID = '${TIRID}' AND ADRID = '${ADRID}'
+        `;
+    db.query(sql, (err, data) => {
+        if (err) return res.json(err);
+        return res.json(data);
+    })
+})
 
 
 app.listen(8081,()=>{

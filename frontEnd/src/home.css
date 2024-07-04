@@ -759,9 +759,23 @@ label[for="horaireSelect"] {
         width: 100%;
       }
       .table-container {
-        max-height: 250px;
+        max-height: 190px;
         overflow-y: auto;
-      }}
+      }
+      .select-w {
+        flex-direction: column;
+        width: 100%;
+      }
+      .select-pc, .select-vc {
+        width: 100%;
+      }
+      .pole-select,.cvc-select,.select-pe{
+        width: 100%;
+
+      }
+    }
+    
+    
 
       @page {
         margin: 0;

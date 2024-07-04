@@ -9,6 +9,7 @@ import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { faTimes ,faExpand, faCompress ,faClock } from '@fortawesome/free-solid-svg-icons';
+import { faSortUp, faSortDown ,faSearch} from '@fortawesome/free-solid-svg-icons';
 import { Select } from 'antd';
 const { Option } = Select;
 
@@ -61,6 +62,14 @@ const [allDay, setAllDay] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const inputRef = useRef(null);
   const [absences, setAbsences] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+  const [searchName, setSearchName] = useState('');
+  const [searchMatricule, setSearchMatricule] = useState('');
+  const [showSearchName, setShowSearchName] = useState(false);
+  const [showSearchMatricule, setShowSearchMatricule] = useState(false);
+  const nameInputRef = useRef(null);
+const matriculeInputRef = useRef(null);
+const [heures, setHeures] = useState([]);
 
   useEffect(() => {
     fetch('http://localhost:8081/absences')
@@ -199,6 +208,7 @@ const generatePDF = () => {
       .catch(err => console.log(err));
   }, []);
 
+
   useEffect(() => {
     if (selectedPeriodes && selectedPoles && selectedClientsId && selectedSitesId && selectedDayIndex+1) {
     
@@ -293,6 +303,12 @@ else if (selectedOption===null){
       if (absenceModalRef.current && !absenceModalRef.current.contains(event.target)) {
         setShowModalAbsence(false);
       }
+      if (nameInputRef.current && !nameInputRef.current.contains(event.target)) {
+        setShowSearchName(false);
+      }
+      if (matriculeInputRef.current && !matriculeInputRef.current.contains(event.target)) {
+        setShowSearchMatricule(false);
+      }
     };
   
     document.addEventListener('mousedown', handleClickOutside);
@@ -301,6 +317,40 @@ else if (selectedOption===null){
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    
+        const [TIRID, CNAME] = selectedClientsId.split('-');
+         const PERSMATR = selectedSalary?.PERSMATR;
+        const [ADRID, SNAME] = selectedSitesId.split('-');
+        const [MONTH, YEAR] = selectedPeriodes.split('-');
+        const [pole, npole] = selectedPoles.split('-');
+        const [selectedMonth, selectedYear] = selectedPeriodes.split('-');
+        const selectedDay = (parseInt(selectedDayIndex) + 1).toString().padStart(2, '0');
+    const formattedDate = `${selectedYear}-${selectedMonth.padStart(2, '0')}-${selectedDay}`;
+    const PLANDATE= formattedDate
+        const url = `http://localhost:8081/heures?PERSMATR=${PERSMATR}&PLANDATE=${PLANDATE}&pole=${pole}&TIRID=${TIRID}&ADRID=${ADRID}`;
+
+        fetch(url)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`Erreur HTTP! Statut: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+              setHeures(data);
+              setStartTime(data[0]?.PLANDEHE || '07:00');
+              setEndTime(data[0]?.PLANFIHE || '19:00');
+              setHours(parseFloat(data[0]?.PLANNBHE).toFixed(2).replace('.', ','));
+            })
+            .catch(err => {
+                console.error('Erreur lors de la récupération des données:', err);
+                
+            });
+    
+}, [selectedClientsId, selectedSitesId, selectedDayIndex, selectedPoles,selectedSalary]);
+
   
 
   const handleClientChange = value => {
@@ -369,32 +419,25 @@ else if (selectedOption===null){
   }, [selectedOption]);
 
   useEffect(() => {
-    if (!allDay) {
+    if (!allDay && startTime && endTime) {
       const start = new Date(`1970-01-01T${startTime}:00`);
       const end = new Date(`1970-01-01T${endTime}:00`);
-  
-      
+
       let startMs = start.getTime();
       let endMs = end.getTime();
-  
-      
+
       if (endMs < startMs) {
-        endMs += 24 * 60 * 60 * 1000; 
+        endMs += 24 * 60 * 60 * 1000;
       }
-  
-      
+
       let diffHours = (endMs - startMs) / (1000 * 60 * 60);
-  
-      
       setHours(diffHours.toFixed(2).replace('.', ','));
-  
-    } else {
-     
-      setStartTime('07:00');
-      setEndTime('19:00');
-      setHours('12,00');
+    } else if (allDay) {
+      setStartTime(heures[0]?.PLANDEHE);
+      setEndTime(heures[0]?.PLANFIHE);
+      setHours(parseFloat(heures[0]?.PLANNBHE).toFixed(2).replace('.', ','));
     }
-  }, [startTime, endTime, allDay]);
+  }, [startTime, endTime, allDay, heures]);
   
   
 
@@ -778,7 +821,7 @@ salaries.forEach(salary => {
     setTdKey(i);
     setTrKey(index);
     setShowListModal(true); 
-    setSelectedSalary(uniqueValuesArray[index]);
+    setSelectedSalary(filteredValuesArray[index]);
     setSelectedDayIndex(i);
     setSelectedValue(v);
 
@@ -826,6 +869,14 @@ salaries.forEach(salary => {
     } else {
       setSelectedEmployee(salarie);
     }
+  };
+
+  const handleSearchNameChange = (e) => {
+    setSearchName(e.target.value);
+  };
+
+  const handleSearchMatriculeChange = (e) => {
+    setSearchMatricule(e.target.value);
   };
   
   const [mois,annee]=selectedPeriodes.split('-');
@@ -893,81 +944,86 @@ const getAbsNat = (naabcode, color) => {
 
 
  
- const getMinMaxTimes = (planpajo) => {
-  if (planpajo === 1) {
-    return { min: '06:00', max: '19:00' };
-  } else if (planpajo === 2) {
-    return { min: '19:00', max: '06:00' };
-  }
-  return { min: '00:00', max: '23:59' }; 
-};
-
-const { min, max } = getMinMaxTimes(selectedValue);
-
-const parseTime = (time) => {
+ const parseTime = (time) => {
   const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
 };
 
 const validateTime = (time, min, max) => {
-
   const parsedTime = parseTime(time);
   const parsedMin = parseTime(min);
   const parsedMax = parseTime(max);
 
-
   if (parsedMin > parsedMax) {
-   
     if (parsedTime >= parsedMin || parsedTime <= parsedMax) {
       return time;
     } else {
-      return min; 
+      return min;
     }
   } else {
-  
     if (parsedTime >= parsedMin && parsedTime <= parsedMax) {
-      return time; 
+      return time;
     } else {
       return min;
     }
   }
 };
 
-
 const handleStartTimeChange = (e) => {
   const time = e.target.value;
-  const validatedTime = validateTime(time, min, max);
+  const validatedTime = validateTime(time, heures[0]?.PLANDEHE, heures[0]?.PLANFIHE);
   setStartTime(validatedTime);
 };
 
 const handleEndTimeChange = (e) => {
   const time = e.target.value;
-  const validatedTime = validateTime(time, min, max);
+  const validatedTime = validateTime(time, heures[0]?.PLANDEHE, heures[0]?.PLANFIHE);
   setEndTime(validatedTime);
 };
 
-const defaultValues = (planpajo) => {
-  if (planpajo === 1) {
-    setStartTime('07:00');
-    setEndTime('19:00');
-  } else if (planpajo === 2) {
-    setStartTime('19:00');
-    setEndTime('06:00');
-  } else {
-    
-    setStartTime('07:00');
-    setEndTime('19:00');
-  }
+const defaultValues = () => {
+  setStartTime(heures[0]?.PLANDEHE || '07:00');
+  setEndTime(heures[0]?.PLANFIHE || '19:00');
+  const formattedHours = heures[0]?.PLANNBHE ? parseFloat(heures[0].PLANNBHE).toFixed(2).replace('.', ',') : '12,00';
+  setHours(formattedHours);
 };
 
 
 useEffect(() => {
-  defaultValues(selectedValue);
-}, [selectedValue]);
- 
+  defaultValues();
+}, [heures ]);
+
+
+const handleSort = (key) => {
+  let direction = 'ascending';
+  if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+    direction = 'descending';
+  }
+  setSortConfig({ key, direction });
+};
+
+
+const sortedValuesArray = [...uniqueValuesArray].sort((a, b) => {
+  if (a[sortConfig.key] < b[sortConfig.key]) {
+    return sortConfig.direction === 'ascending' ? -1 : 1;
+  }
+  if (a[sortConfig.key] > b[sortConfig.key]) {
+    return sortConfig.direction === 'ascending' ? 1 : -1;
+  }
+  return 0;
+});
+
+const filteredValuesArray = sortedValuesArray.filter(entry =>
+  ((entry.PERSNOPE.toLowerCase() + ' ' + entry.PERSPRPE.toLowerCase()).includes(searchName.toLowerCase()) || (entry.PERSPRPE.toLowerCase() + ' ' + entry.PERSNOPE.toLowerCase()).includes(searchName.toLowerCase())) &&
+  entry.PERSMATR.toLowerCase().includes(searchMatricule.toLowerCase())
+);
+
+
+
   return (
     <>
       
+    
        
       <p className='header-title'>Pointage - Cycles par chantier</p>
       <div className='select-container'>
@@ -1106,7 +1162,7 @@ useEffect(() => {
             </div>
             <div className="consolider">
               <button className='consolider-button'>
-                Consolider <FontAwesomeIcon icon={faLock} className='falock' /> 
+              Clôturer <FontAwesomeIcon icon={faLock} className='falock' /> 
               </button>
               <button className='exit-button'>
               <FontAwesomeIcon icon={faSignOutAlt} className='faSignOutAlt'/>
@@ -1121,54 +1177,100 @@ useEffect(() => {
       <div className="table-c">
       <div className="table-container">
         <table border={3}>
-          <thead>
-            <tr>
-          <th colSpan="2" style={{ width: '200px' }}> </th>
-          {Array.from({ length: daysInMonth }, (_, i) => (
-                <th key={i + 1} style={{ width: '40px' }}>{String(i + 1).padStart(2, '0')}</th>
-              ))}
-          </tr>
-            <tr>
-           
-              <th style={{ width: '250px' , textAlign:'center'}}>Salariés</th>
-              <th style={{ width: '50px' }}></th>
-              {Array.from({ length: daysInMonth }, (_, i) => (
-      <th key={i + 1} style={{ width: '40px' }}>{getDayAbbreviation(new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1).getDay())}</th>
+        <thead>
+  <tr>
+    <td colSpan="3" style={{ width: '200px' }}></td>
+    {Array.from({ length: daysInMonth }, (_, i) => (
+      <td key={i + 1} style={{ width: '40px' }}>{String(i + 1).padStart(2, '0')}</td>
     ))}
-            </tr>
-          </thead>
-          
+  </tr>
+  <tr>
+    <td style={{ textAlign: 'center' }}>
+      {showSearchName ? (
+        <input
+          type='text'
+          placeholder='Rechercher par nom'
+          value={searchName}
+          onChange={handleSearchNameChange}
+          ref={nameInputRef}
+          style={{ width: '100%' }}
+        />
+      ) : (
+        <>
+          Nom et Prenom
+          <FontAwesomeIcon
+            icon={faSearch}
+            onClick={() => setShowSearchName(!showSearchName)}
+            style={{ cursor: 'pointer', marginLeft: '5px' }}
+          />
+          <FontAwesomeIcon
+            icon={sortConfig.key === 'PERSNOPE' && sortConfig.direction === 'ascending' ? faSortUp : faSortDown}
+            onClick={() => handleSort('PERSNOPE')}
+            style={{ cursor: 'pointer', marginLeft: '5px' }}
+          />
+        </>
+      )}
+    </td>
+    <td>
+      {showSearchMatricule ? (
+        <input
+          type='text'
+          placeholder='Rechercher par matricule'
+          value={searchMatricule}
+          onChange={handleSearchMatriculeChange}
+          ref={matriculeInputRef}
+          style={{ width: '100%' }}
+        />
+      ) : (
+        <>
+          Matricule
+          <FontAwesomeIcon
+            icon={faSearch}
+            onClick={() => setShowSearchMatricule(!showSearchMatricule)}
+            style={{ cursor: 'pointer', marginLeft: '5px' }}
+          />
+          <FontAwesomeIcon
+            icon={sortConfig.key === 'PERSMATR' && sortConfig.direction === 'ascending' ? faSortUp : faSortDown}
+            onClick={() => handleSort('PERSMATR')}
+            style={{ cursor: 'pointer', marginLeft: '5px' }}
+          />
+        </>
+      )}
+    </td>
+    <th style={{ width: '50px' }}></th>
+    {Array.from({ length: daysInMonth }, (_, i) => (
+      <td key={i + 1} style={{ width: '40px' }}>
+        {getDayAbbreviation(new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1).getDay())}
+      </td>
+    ))}
+  </tr>
+</thead>
           <tbody>
-          {uniqueValuesArray.map((entry, index) => (
-    <tr key={index}>
-      <td style={{ fontSize: '15px' }}>
-        {entry.PERSMATR}/-{entry.PERSNOPE} {entry.PERSPRPE}
-      </td>
-      <td style={{ textAlign: 'center' }}>
-        {entry.LIBEABR}
-      </td>
-      {Array.from({ length: daysInMonth }, (_, i) => {
-  const currentDate = new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1);
-  const currentDateString = currentDate.toISOString().slice(0, 10); 
-  const matchingIndex = entry.PLANDATE.findIndex(date => date.slice(0, 10) === currentDateString);
-  const matchingValue = matchingIndex !== -1 ? entry.values[matchingIndex] : null;
-  const absence = checkAbsence(entry.PERSMATR, currentDate);
-
- 
-
-  const cellValue = absence !== null ? getAbsNat(absence, "black")  : getText(matchingValue);
-  
-  
-
-  return (
-    <td 
-      key={i + 1} 
-      style={{ textAlign: 'center', color: getColor(matchingValue), fontWeight: 'bolder' }} 
-      onContextMenu={(e) => handleRightClick(e, i, index, matchingValue)} 
-      className='tdtable' 
-      onClick={(e) => handleCellClick(e, entry, i, matchingValue)}
-    >
-      {cellValue}
+            {filteredValuesArray.map((entry, index) => (
+              <tr key={index}>
+                <td style={{ fontSize: '15px' }}>
+                  {entry.PERSNOPE} {entry.PERSPRPE}
+                </td>
+                <td>{entry.PERSMATR}</td>
+                <td style={{ textAlign: 'center' }}>
+                  {entry.LIBEABR}
+                </td>
+                {Array.from({ length: daysInMonth }, (_, i) => {
+                  const currentDate = new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1);
+                  const currentDateString = currentDate.toISOString().slice(0, 10); 
+                  const matchingIndex = entry.PLANDATE.findIndex(date => date.slice(0, 10) === currentDateString);
+                  const matchingValue = matchingIndex !== -1 ? entry.values[matchingIndex] : null;
+                  const absence = checkAbsence(entry.PERSMATR, currentDate);
+                  const cellValue = absence !== null ? getAbsNat(absence, "black") : getText(matchingValue);
+                  return (
+                    <td 
+                      key={i + 1} 
+                      style={{ textAlign: 'center', color: getColor(matchingValue), fontWeight: 'bolder' }} 
+                      onContextMenu={(e) => handleRightClick(e, i, index, matchingValue)} 
+                      className='tdtable' 
+                      onClick={(e) => handleCellClick(e, entry, i, matchingValue)}
+                    >
+                      {cellValue}
            
             {showListModal && tdKey === i && trKey === index && matchingValue ? 
               <div className="liste" ref={listModalRef}>
@@ -1269,8 +1371,8 @@ useEffect(() => {
             type="time"
             value={startTime}
             onChange={handleStartTimeChange}
-            min={min}
-            max={max}
+            min={heures[0]?.PLANDEHE}
+            max={heures[0]?.PLANDFIHE}
             disabled={allDay}
           />
         </div>
@@ -1283,8 +1385,8 @@ useEffect(() => {
             type="time"
             value={endTime}
             onChange={handleEndTimeChange}
-            min={min}
-            max={max}
+            min={heures[0]?.PLANDEHE}
+            max={heures[0]?.PLANFIHE}
             disabled={allDay}
           />
           </div>
