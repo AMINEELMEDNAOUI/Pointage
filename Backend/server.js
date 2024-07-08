@@ -2,10 +2,19 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const moment = require('moment');
+const cookieParser =require('cookie-parser');
+const jwt =require('jsonwebtoken');
 
 const app = express()
-app.use(cors())
+app.use(cors(
+    {
+        origin:["http://localhost:5173"],
+        methods:["POST,GET","PUT","DELETE"],
+        credentials:true
+    }
+))
 app.use(express.json());
+app.use(cookieParser());
 
 const db =mysql.createConnection({
     host:"localhost",
@@ -373,7 +382,6 @@ const getDatesBetween = (startDate, endDate) => {
 
 
   app.post('/insertEmployee', (req, res) => {
-
     const {
         PERSMATR, PLANDATE, PLANDATE2, PERSNOPE, PERSPRPE,
         PLANNBHE, PLANDEHE, PLANFIHE,
@@ -384,72 +392,81 @@ const getDatesBetween = (startDate, endDate) => {
         return res.status(400).json({ error: 'Tous les champs requis doivent être fournis.' });
     }
 
-    
-
     const dates = getDatesBetween(PLANDATE, PLANDATE2);
 
     const insertQuery = `
-    INSERT INTO EXT_RHPLANNIN (
-      PERSMATR, PLANDATE, PERSNOPE, PERSPRPE,
-      PLANPAJO, PLANNBHE, PLANDEHE, PLANFIHE,
-      PLANJOUR, PLANSEMA, PLANETPL,
-      PLANBAJO, PERICODE, PLANCLPA, PLANCLMC,
-      PLANPLCM, PLANCLFI, ETATVALI, ETATCLOT,
-      STATZONE, TIRID, TIRCODE, ADRID, PCVID,
-      GENUMCYC, GENECLPA, PCVNUM, ARTID, STATCLAS,
-      STATNATURE, VILLCODE, IDENTECYCL, ETATCONS
-    )
-    SELECT
-      ?, ?, ?, ?,
-      PLANPAJO, ?, ?, ?,
-      PLANJOUR, PLANSEMA, PLANETPL,
-      PLANBAJO, PERICODE, PLANCLPA, PLANCLMC,
-      PLANPLCM, PLANCLFI, ETATVALI, ETATCLOT,
-      STATZONE, TIRID, TIRCODE, ADRID, PCVID,
-      GENUMCYC, GENECLPA, PCVNUM, ARTID, STATCLAS,
-      STATNATURE, VILLCODE, IDENTECYCL, ETATCONS
-    FROM
-      EXT_RHPLANNIN
-    WHERE
-      PERSMATR = ? AND PLANDATE= ? AND STATNATURE = ? AND TIRID=? AND ADRID=?;
-  `;
-
-    
-  dates.forEach((date) => {
-    const checkExistenceQuery = `
-        SELECT COUNT(*) AS count 
-        FROM EXT_RHPLANNIN 
-        WHERE PERSMATR = ? AND PLANDATE = ? AND STATNATURE = ? AND TIRID = ? AND ADRID = ?;
+        INSERT INTO EXT_RHPLANNIN (
+            PERSMATR, PLANDATE, PERSNOPE, PERSPRPE,
+            PLANPAJO, PLANNBHE, PLANDEHE, PLANFIHE,
+            PLANJOUR, PLANSEMA, PLANETPL,
+            PLANBAJO, PERICODE, 
+            PLANCLPA, PLANCLMC, PLANPLCM, PLANCLFI, 
+            ETATVALI, ETATCLOT,
+            STATZONE, TIRID, TIRCODE, ADRID, PCVID,
+            GENUMCYC, GENECLPA, PCVNUM, ARTID, STATCLAS,
+            STATNATURE, VILLCODE, IDENTECYCL, ETATCONS
+        )
+        SELECT
+            ?, ?, ?, ?,
+            PLANPAJO, ?, ?, ?,
+            PLANJOUR, PLANSEMA, PLANETPL,
+            PLANBAJO, PERICODE, 
+            REPLACE(PLANCLPA, ?, ?), 
+            REPLACE(PLANCLMC, ?, ?), 
+            REPLACE(PLANPLCM, ?, ?), 
+            REPLACE(PLANCLFI, ?, ?), 
+            ETATVALI, ETATCLOT,
+            STATZONE, TIRID, TIRCODE, ADRID, PCVID,
+            GENUMCYC, GENECLPA, PCVNUM, ARTID, STATCLAS,
+            STATNATURE, VILLCODE, IDENTECYCL, ETATCONS
+        FROM
+            EXT_RHPLANNIN
+        WHERE
+            PERSMATR = ? AND PLANDATE = ? AND STATNATURE = ? AND TIRID = ? AND ADRID = ?;
     `;
 
-    db.query(checkExistenceQuery, [PERSMATR2, date, POLE, CLIENT, CHANTIER], (error, results, fields) => {
-        if (error) {
-            console.error('Erreur lors de la vérification de l\'existence:', error);
-            return res.status(500).json({ error: 'Erreur lors de la vérification de l\'existence' });
-        }
+    const promises = dates.map((date) => {
+        return new Promise((resolve, reject) => {
+            const checkExistenceQuery = `
+                SELECT COUNT(*) AS count 
+                FROM EXT_RHPLANNIN 
+                WHERE PERSMATR = ? AND PLANDATE = ? AND STATNATURE = ? AND TIRID = ? AND ADRID = ?;
+            `;
 
-        const count = results[0].count;
-
-        console.log(`Nombre de lignes trouvées pour ${date} /${PERSMATR2}/${POLE}/${CLIENT}/${CHANTIER}: ${count}`); 
-
-        if (count === 0) {
-           
-            db.query(
-                insertQuery,
-                [PERSMATR2, date, PERSNOPE, PERSPRPE, PLANNBHE, PLANDEHE, PLANFIHE, PERSMATR, date, POLE, CLIENT, CHANTIER],
-                (insertError, insertResults, insertFields) => {
-                    if (insertError) {
-                        console.error('Erreur lors de l\'insertion du salarié:', insertError);
-                        return res.status(500).json({ error: 'Erreur lors de l\'insertion du salarié' });
-                    }
+            db.query(checkExistenceQuery, [PERSMATR2, date, POLE, CLIENT, CHANTIER], (error, results) => {
+                if (error) {
+                    return reject('Erreur lors de la vérification de l\'existence: ' + error);
                 }
-            );
-        }
+
+                const count = results[0].count;
+
+                if (count === 0) {
+                    db.query(
+                        insertQuery,
+                        [
+                            PERSMATR2, date, PERSNOPE, PERSPRPE, 
+                            PLANNBHE, PLANDEHE, PLANFIHE, 
+                            PERSMATR, PERSMATR2, PERSMATR, PERSMATR2, 
+                            PERSMATR, PERSMATR2, PERSMATR, PERSMATR2,
+                            PERSMATR, date, POLE, CLIENT, CHANTIER
+                        ],
+                        (insertError) => {
+                            if (insertError) {
+                                return reject('Erreur lors de l\'insertion du salarié: ' + insertError);
+                            }
+                            resolve();
+                        }
+                    );
+                } else {
+                    resolve();
+                }
+            });
+        });
     });
-});
 
-
-    res.status(200).json({ message: 'Insertion réussie pour toutes les dates spécifiées.' });
+    Promise.all(promises)
+        .then(() => res.status(200).json({ message: 'Insertion réussie pour toutes les dates spécifiées.' }))
+        .catch((error) => res.status(500).json({ error }));
 });
 
 
@@ -470,6 +487,48 @@ app.get('/heures', (req, res) => {
         return res.json(data);
     })
 })
+
+app.post('/login',(req,res) => {
+    const sql ="select SCPROUTI , SCDESUTI , SCMOTPAS FROM SECURITE WHERE SCPROUTI=? AND SCMOTPAS=? ";
+    db.query(sql,[req.body.Name,req.body.Password],(err,data) =>{
+        if(err) return res.json({Message:"Server Side Error"});
+        if(data.length>0){
+               const name =data[0].SCDESUTI;
+               const token=jwt.sign({name},"our-jsonwebtoken-secret-key",{expiresIn:'1d'});
+               res.cookie('token',token);
+               return res.json({status:"Success"})
+              
+        }else{
+                return res.json({Message:"nom ou mot de passe incorrect"});
+        }
+    })
+})
+
+app.post('/logout', (req, res) => {
+    res.clearCookie('token');
+    return res.json({ status: "Success", message: "Logged out successfully" });
+});
+
+const authenticateJWT = (req, res, next) => {
+    const token = req.cookies.token;
+    
+    if (token) {
+      jwt.verify(token, 'our-jsonwebtoken-secret-key', (err, user) => {
+        if (err) {
+          return res.sendStatus(403); 
+        }
+        req.user = user;
+        next();
+      });
+    } else {
+      res.sendStatus(401); 
+    }
+  };
+  
+  app.get('/protected-route', authenticateJWT, (req, res) => {
+    res.send('This is a protected route');
+  });
+
 
 
 app.listen(8081,()=>{

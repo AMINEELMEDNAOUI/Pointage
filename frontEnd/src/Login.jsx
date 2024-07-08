@@ -1,116 +1,95 @@
 import React, { useState } from 'react';
-import './Login.css';
-import { useNavigate } from 'react-router-dom';
 import {
-    MDBBtn,
-    MDBContainer,
-    MDBCard,
-    MDBCardBody,
-    MDBCardImage,
-    MDBRow,
-    MDBCol,
-    MDBIcon,
-    MDBInput
+  MDBBtn,
+  MDBContainer,
+  MDBCard,
+  MDBCardBody,
+  MDBInput
 } from 'mdb-react-ui-kit';
-import {Link} from 'react-router-dom';
+import './Login.css';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { message } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 function Login() {
-    const [values, setValues] = useState({
-        email: '',
-        password: ''
-    });
+  const [values, setValues] = useState({
+    Name: '',
+    Password: '',
+    showPassword: false // Ajout de l'état pour gérer l'affichage du mot de passe
+  });
 
-    const handleInputChange = event => {
-        setValues(prev => ({ ...prev, [event.target.name]: event.target.value }));
-    }
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
-    const handleSubmit = event => {
-        event.preventDefault();
-        fetch('http://localhost:8081/Login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(values)
-        })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Network response was not ok');
-                }
-            })
-            .then(data => {
-                if (data.Status === "Success") {
-                    navigate('/');
-                } else {
-                    alert("Error");
-                }
-            })
-            .catch(error => {
-                console.error('There was an error with the fetch operation:', error);
-            });
-    }
+  axios.defaults.withCredentials = true;
 
-    return (
-        <MDBContainer className="d-flex justify-content-center align-items-center bg-image full-page-container " style={{backgroundImage: 'url(https://img.freepik.com/free-photo/top-view-international-worker-s-day-still-life_23-2150337535.jpg?w=1060&t=st=1716799289~exp=1716799889~hmac=50a4d5df175b3fae79fb9c2d0aee21f538f45d7ea53fd0e586dee753422cb9d5)'}}>
-            <MDBCard className="w-75">
-                <MDBRow className="g-0">
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Submitted values:', values);
+    axios.post('http://localhost:8081/login', values)
+      .then(res => {
+        console.log('Server response:', res.data);
+        if (res.data.status === "Success") {
+          navigate('/home');
+        } else {
+          message.error(res.data.Message);
+        }
+      })
+      .catch(err => console.log('Error:', err));
+  };
 
-                    <MDBCol md="6">
-                        <MDBCardImage src="/PLANIFY3.png" alt="login form" className="rounded-start w-100 h-100" />
-                    </MDBCol>
+  const togglePasswordVisibility = () => {
+    setValues({ ...values, showPassword: !values.showPassword });
+  };
 
-                    <MDBCol md="6">
-                        <MDBCardBody className="d-flex flex-column">
-
-                            <div className="d-flex flex-row mt-2 align-items-center">
-                                <MDBIcon fas icon="cubes fa-3x me-3" style={{ color: '#ff6219' }} />
-                                <div className="logo">
-                                    <img src="/planify.ico" alt="Logo" className="logo-image mb-0 w-3" />
-                                </div>
-                            </div>
-
-                            <h5 className="fw-normal my-4 pb-3" style={{ letterSpacing: '1px' }}>Sign into your account</h5>
-
-                            <MDBInput
-                                wrapperClass="mb-4"
-                                label="Email address"
-                                id="formControlLg"
-                                type="email"
-                                size="lg"
-                                name="email"
-                                value={values.email}
-                                onChange={handleInputChange}
-                            />
-                            <MDBInput
-                                wrapperClass="mb-4"
-                                label="Password"
-                                id="formControlLg"
-                                type="password"
-                                size="lg"
-                                name="password"
-                                value={values.password}
-                                onChange={handleInputChange}
-                            />
-
-                            <MDBBtn onClick={handleSubmit} className="mb-4 px-5" color="dark" size="lg">Login</MDBBtn>
-                            <a className="small text-muted" href="#!">Forgot password?</a>
-                            <p className="mb-5 pb-lg-2" style={{ color: '#393f81' }}>Don't have an account? <Link to="/register" style={{ color: '#393f81' }}>Register here</Link></p>
-
-                            <div className="d-flex flex-row justify-content-start">
-                                <a href="#!" className="small text-muted me-1">Terms of use.</a>
-                                <a href="#!" className="small text-muted">Privacy policy</a>
-                            </div>
-
-                        </MDBCardBody>
-                    </MDBCol>
-
-                </MDBRow>
-            </MDBCard>
-        </MDBContainer>
-    );
+  return (
+    <MDBContainer fluid className='d-flex align-items-center justify-content-center bg-image h-100'>
+      <MDBCard className='m-5' style={{ maxWidth: '500px', width: '500px' }}>
+        <MDBCardBody className='p-5'>
+          <h2 className="text-center mb-5">Login</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="form1" className="form-label">Name</label>
+              <MDBInput
+                wrapperClass='mb-4'
+                size='lg'
+                id='form1'
+                type='text'
+                name='Name'
+                className='inp'
+                value={values.Name}
+                required
+                onChange={e => setValues({ ...values, Name: e.target.value })}
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="form3" className="form-label">Password</label>
+              <div className="password-input-wrapper">
+                <MDBInput
+                  wrapperClass='mb-4'
+                  size='lg'
+                  id='form3'
+                  type={values.showPassword ? 'text' : 'password'} 
+                  name='Password'
+                  className='inp'
+                  value={values.Password}
+                  required
+                  onChange={e => setValues({ ...values, Password: e.target.value })}
+                />
+                <FontAwesomeIcon
+                  icon={values.showPassword ? faEyeSlash : faEye} 
+                  className='toggle-password-icon'
+                  onClick={togglePasswordVisibility}
+                />
+              </div>
+            </div>
+            <MDBBtn type='submit' className='mb-4 w-100 gradient-custom-4' size='lg'>Login</MDBBtn>
+          </form>
+        </MDBCardBody>
+      </MDBCard>
+    </MDBContainer>
+  );
 }
 
 export default Login;

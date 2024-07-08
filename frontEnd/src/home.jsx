@@ -11,7 +11,11 @@ import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { faTimes ,faExpand, faCompress ,faClock } from '@fortawesome/free-solid-svg-icons';
 import { faSortUp, faSortDown ,faSearch} from '@fortawesome/free-solid-svg-icons';
 import { Select } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 const { Option } = Select;
+
+
 
 
 
@@ -70,6 +74,8 @@ const [allDay, setAllDay] = useState(false);
   const nameInputRef = useRef(null);
 const matriculeInputRef = useRef(null);
 const [heures, setHeures] = useState([]);
+
+const navigate = useNavigate();
 
   useEffect(() => {
     fetch('http://localhost:8081/absences')
@@ -752,17 +758,17 @@ const submitWithoutReplacement = async () => {
   const uniqueValuesArray = [];
 
   salaries.forEach(salary => {
-      // Vérifie si une entrée avec les mêmes critères existe déjà dans uniqueValuesArray
+      
       const isSameGroup = (item) => 
           item.PERSMATR === salary.PERSMATR && 
           item.PERSNOPE === salary.PERSNOPE &&
           item.PERSPRPE === salary.PERSPRPE &&
           item.LIBEABR === salary.LIBEABR;
   
-      // Recherche une entrée existante qui correspond
+     
       let entry = uniqueValuesArray.find(isSameGroup);
   
-      // Si aucune entrée n'est trouvée, en créer une nouvelle
+     
       if (!entry) {
           entry = {
               PERSMATR: salary.PERSMATR,
@@ -771,25 +777,24 @@ const submitWithoutReplacement = async () => {
               LIBEABR: salary.LIBEABR,
               PLANDATE: [],
               values: [],
-              totalHours: 0,  // Initialisation du total des heures
-              totalDays: 0    // Initialisation du total des jours
+              totalHours: 0,  
+              totalDays: 0    
           };
-          uniqueValuesArray.push(entry); // Ajout de la nouvelle entrée à uniqueValuesArray
+          uniqueValuesArray.push(entry);
       }
   
-      // Ajout des données spécifiques du salarié à l'entrée trouvée ou créée
-      entry.PLANDATE.push(salary.PLANDATE); // Ajout de la date de planification
+      
+      entry.PLANDATE.push(salary.PLANDATE);
       entry.values.push(salary.PLANPAJO);   
 
       const plandate = new Date(salary.PLANDATE);
   
-      // Vérifier s'il y a une absence pour ce salarié avant d'ajouter les totaux
         if (!checkAbsence(salary.PERSMATR, plandate)) {
-          entry.totalHours += parseFloat(salary.PLANNBHE.replace(',', '.')); // Ajout des heures
-          entry.totalDays += parseFloat(salary.NBREJR); // Ajout des jours
+          entry.totalHours += parseFloat(salary.PLANNBHE.replace(',', '.')); 
+          entry.totalDays += parseFloat(salary.NBREJR);
        }
   
-      // Affichage des informations pour vérification
+      
       console.log(`Salary: PERSMATR=${salary.PERSMATR}, PLANDATE=${salary.PLANDATE}, PLANPAJO=${salary.PLANPAJO}`);
       console.log(`Entry after update:`, entry);
   });
@@ -1041,7 +1046,18 @@ const filteredValuesArray = sortedValuesArray.filter(entry =>
   entry.PERSMATR.toLowerCase().includes(searchMatricule.toLowerCase())
 );
 
-
+ 
+const handleLogout = () => {
+  axios.post('http://localhost:8081/logout', {}, { withCredentials: true })
+    .then(res => {
+      if (res.data.status === "Success") {
+        navigate('/');
+      } else {
+        alert(res.data.message);
+      }
+    })
+    .catch(err => console.log('Error:', err));
+};
 
   return (
     <>
@@ -1187,7 +1203,7 @@ const filteredValuesArray = sortedValuesArray.filter(entry =>
               <button className='consolider-button'>
               Clôturer <FontAwesomeIcon icon={faLock} className='falock' /> 
               </button>
-              <button className='exit-button'>
+              <button className='exit-button' onClick={handleLogout}>
               <FontAwesomeIcon icon={faSignOutAlt} className='faSignOutAlt'/>
               </button>
             </div>
@@ -1309,14 +1325,14 @@ const filteredValuesArray = sortedValuesArray.filter(entry =>
         );
       })}
       
-      {/* Colonne Nombre d'heures travaillées */}
+    
       <td style={{ textAlign: 'center', fontWeight: 'bolder' }}>
-        {entry.totalHours.toFixed(2)} {/* Assurez-vous que les heures sont affichées avec deux décimales */}
+        {entry.totalHours.toFixed(2)} 
       </td>
 
-      {/* Colonne Nombre de jours travaillés */}
+    
       <td style={{ textAlign: 'center', fontWeight: 'bolder' }}>
-        {entry.totalDays.toFixed(2)} {/* Assurez-vous que les jours sont affichés avec deux décimales */}
+        {entry.totalDays.toFixed(2)} 
       </td>
     </tr>
   ))}
