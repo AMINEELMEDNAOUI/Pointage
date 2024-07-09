@@ -112,7 +112,7 @@ tr:nth-child(odd) {
 }
 .table-c{
   background-color: #f1f1f1;
-  height:70vh;
+  height:67vh;
   overflow-x: auto; 
   overflow-y: auto; 
 
@@ -773,6 +773,19 @@ label[for="horaireSelect"] {
         width: 100%;
 
       }
+      
+      
+    }
+    
+    @media screen and (max-width: 370px) {
+     
+      .table-container {
+        max-height: 160px;
+        overflow-y: auto;
+      }
+      
+      
+      
     }
     
     
@@ -807,13 +820,24 @@ label[for="horaireSelect"] {
             page-break-inside: auto;
         }
         thead {
-            display: table-header-group; /* Assure que l'en-tête se répète */
+            display: table-header-group; 
         }
         tr {
-            page-break-inside: avoid; /* Empêche la rupture de page à l'intérieur des lignes */
+            page-break-inside: avoid; 
         }
     }
     
+    .ploguser {
+      position: relative; /* Utiliser 'relative' au lieu de 'absolute' pour permettre un positionnement plus flexible */
+      width: 100%; /* Ajuster la largeur pour qu'elle soit proportionnelle à l'écran */
+      text-align: center;
+      font-size: large;
+      font-weight: bolder;
+      font-family: Georgia, 'Times New Roman', Times, serif;
+      margin-top: 10px; /* Ajouter une marge pour l'espacement */
+      background-color: #f1f1f1;
+      margin: 0;
+    }
 
       
 

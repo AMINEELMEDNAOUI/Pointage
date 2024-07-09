@@ -31,6 +31,8 @@ function Login() {
       .then(res => {
         console.log('Server response:', res.data);
         if (res.data.status === "Success") {
+          // Stocker le token dans le localStorage
+          localStorage.setItem('token', res.data.token);
           navigate('/home');
         } else {
           message.error(res.data.Message);

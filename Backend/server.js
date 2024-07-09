@@ -498,7 +498,8 @@ app.post('/login',(req,res) => {
                res.cookie('token',token);
                return res.json({status:"Success"})
               
-        }else{
+                        }
+        else{
                 return res.json({Message:"nom ou mot de passe incorrect"});
         }
     })
@@ -526,8 +527,9 @@ const authenticateJWT = (req, res, next) => {
   };
   
   app.get('/protected-route', authenticateJWT, (req, res) => {
-    res.send('This is a protected route');
+    res.json({ name: req.user.name }); 
   });
+  
 
 
 

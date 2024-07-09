@@ -12,6 +12,7 @@ import { faTimes ,faExpand, faCompress ,faClock } from '@fortawesome/free-solid-
 import { faSortUp, faSortDown ,faSearch} from '@fortawesome/free-solid-svg-icons';
 import { Select } from 'antd';
 import { useNavigate } from 'react-router-dom';
+
 import axios from 'axios';
 const { Option } = Select;
 
@@ -74,6 +75,7 @@ const [allDay, setAllDay] = useState(false);
   const nameInputRef = useRef(null);
 const matriculeInputRef = useRef(null);
 const [heures, setHeures] = useState([]);
+const [loginName, setLoginName] = useState('');
 
 const navigate = useNavigate();
 
@@ -1059,12 +1061,27 @@ const handleLogout = () => {
     .catch(err => console.log('Error:', err));
 };
 
+useEffect(() => {
+  
+  axios.get('http://localhost:8081/protected-route', { withCredentials: true })
+      .then(res => {
+          const { name } = res.data;
+          setLoginName(name);
+      })
+      .catch(err => {
+          console.error('Error fetching protected route:', err);
+          navigate('/login'); 
+      });
+}, []);
+
   return (
     <>
-      
     
-       
+    
+       <div className='tit-loguser'>
       <p className='header-title'>Pointage - Cycles par chantier</p>
+      <p className='ploguser'>User : {loginName}</p>
+      </div>
       <div className='select-container'>
         <div className="pcvc-container">
           <p className='pcvc-title'>Critère de recherche</p>
