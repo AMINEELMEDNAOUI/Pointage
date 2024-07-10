@@ -77,6 +77,7 @@ const matriculeInputRef = useRef(null);
 const [heures, setHeures] = useState([]);
 const [loginName, setLoginName] = useState('');
 
+
 const navigate = useNavigate();
 
   useEffect(() => {
@@ -794,11 +795,25 @@ const submitWithoutReplacement = async () => {
         if (!checkAbsence(salary.PERSMATR, plandate)) {
           entry.totalHours += parseFloat(salary.PLANNBHE.replace(',', '.')); 
           entry.totalDays += parseFloat(salary.NBREJR);
+       } else {
+        const absence = absences.find(abs => abs.PERSMATR === salary.PERSMATR && new Date(abs.ABSEDEHE) <= plandate && plandate <= new Date(abs.ABSEFIHE));
+
+         if (absence) {
+            const ABSENBHR = absence.ABSENBHR;
+            entry.totalHours += parseFloat(salary.PLANNBHE.replace(',', '.'))-ABSENBHR; 
+            entry.totalDays += parseInt(salary.NBREJR) - ABSENBHR / parseFloat(salary.PLANNBHE.replace(',', '.'));
+
+          
+        }
        }
-  
+       
       
       console.log(`Salary: PERSMATR=${salary.PERSMATR}, PLANDATE=${salary.PLANDATE}, PLANPAJO=${salary.PLANPAJO}`);
       console.log(`Entry after update:`, entry);
+    
+
+      
+
   });
   
   console.log(`Unique values array after processing:`, uniqueValuesArray);
@@ -1003,13 +1018,16 @@ const handleStartTimeChange = (e) => {
   const time = e.target.value;
   const validatedTime = validateTime(time, heures[0]?.PLANDEHE, heures[0]?.PLANFIHE);
   setStartTime(validatedTime);
+  
 };
 
 const handleEndTimeChange = (e) => {
   const time = e.target.value;
   const validatedTime = validateTime(time, heures[0]?.PLANDEHE, heures[0]?.PLANFIHE);
   setEndTime(validatedTime);
+ 
 };
+
 
 const defaultValues = () => {
   setStartTime(heures[0]?.PLANDEHE || '07:00');
@@ -1021,7 +1039,7 @@ const defaultValues = () => {
 
 useEffect(() => {
   defaultValues();
-}, [heures ]);
+}, [heures,allDay ]);
 
 
 const handleSort = (key) => {
@@ -1241,7 +1259,7 @@ useEffect(() => {
     ))}
   </tr>
   <tr>
-    <td style={{ textAlign: 'center' }}>
+    <td style={{ textAlign: 'center' ,width:'120px'}}>
       {showSearchName ? (
         <input
           type='text'
@@ -1267,7 +1285,7 @@ useEffect(() => {
         </>
       )}
     </td>
-    <td>
+    <td >
       {showSearchMatricule ? (
         <input
           type='text'
@@ -1295,7 +1313,7 @@ useEffect(() => {
     </td>
     <th style={{ width: '50px' }}></th>
     {Array.from({ length: daysInMonth }, (_, i) => (
-      <td key={i + 1} style={{ width: '40px' }}>
+      <td key={i + 1} style={{ width: '10px' }}>
         {getDayAbbreviation(new Date(selectedPeriodes.split('-')[1], selectedPeriodes.split('-')[0] - 1, i + 1).getDay())}
       </td>
       
@@ -1307,7 +1325,7 @@ useEffect(() => {
 <tbody>
   {filteredValuesArray.map((entry, index) => (
     <tr key={index}>
-      <td style={{ fontSize: '15px' }}>
+      <td style={{ fontSize: '12px' }}>
         {entry.PERSNOPE} {entry.PERSPRPE}
       </td>
       <td>{entry.PERSMATR}</td>

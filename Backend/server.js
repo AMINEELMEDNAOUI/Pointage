@@ -293,7 +293,7 @@ app.put('/planning', (req, res) => {
             PERSMATR, 
             DATE_FORMAT(DATE_ADD(ABSEDEHE, INTERVAL IF(HOUR(ABSEDEHE) = 23, 1, 0) DAY), '%Y-%m-%dT%H:%i:%s.000Z') AS ABSEDEHE,
             DATE_FORMAT(DATE_ADD(ABSEFIHE, INTERVAL IF(HOUR(ABSEFIHE) = 23, 1, 0) DAY), '%Y-%m-%dT%H:%i:%s.000Z') AS ABSEFIHE,
-            NAABCODE 
+            NAABCODE ,ABSENBHR 
         FROM EXT_RHABSENCES
     `;
 
