@@ -288,12 +288,14 @@ app.put('/planning', (req, res) => {
     });
   });
   app.get('/absences', (req, res) => {
-    const sql = `SELECT 
-                    PERSMATR, 
-                    DATE_ADD(ABSEDEHE, INTERVAL 1 DAY) AS ABSEDEHE,
-                    DATE_ADD(ABSEFIHE, INTERVAL 1 DAY) AS ABSEFIHE,
-                    NAABCODE 
-                 FROM EXT_RHABSENCES`; 
+    const sql = `
+        SELECT 
+            PERSMATR, 
+            DATE_FORMAT(DATE_ADD(ABSEDEHE, INTERVAL IF(HOUR(ABSEDEHE) = 23, 1, 0) DAY), '%Y-%m-%dT%H:%i:%s.000Z') AS ABSEDEHE,
+            DATE_FORMAT(DATE_ADD(ABSEFIHE, INTERVAL IF(HOUR(ABSEFIHE) = 23, 1, 0) DAY), '%Y-%m-%dT%H:%i:%s.000Z') AS ABSEFIHE,
+            NAABCODE 
+        FROM EXT_RHABSENCES
+    `;
 
     db.query(sql, (err, results) => {
         if (err) {
@@ -305,6 +307,7 @@ app.put('/planning', (req, res) => {
         }
     });
 });
+
 
 
 

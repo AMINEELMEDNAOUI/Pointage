@@ -9,7 +9,7 @@ import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { faTimes ,faExpand, faCompress ,faClock } from '@fortawesome/free-solid-svg-icons';
-import { faSortUp, faSortDown ,faSearch} from '@fortawesome/free-solid-svg-icons';
+import { faSortUp, faSortDown ,faSearch,faUser} from '@fortawesome/free-solid-svg-icons';
 import { Select } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
@@ -1080,7 +1080,7 @@ useEffect(() => {
     
        <div className='tit-loguser'>
       <p className='header-title'>Pointage - Cycles par chantier</p>
-      <p className='ploguser'>User : {loginName}</p>
+      <p className='ploguser'><FontAwesomeIcon icon={faUser} className='iconuser'/> {loginName}</p>
       </div>
       <div className='select-container'>
         <div className="pcvc-container">
