@@ -1,0 +1,11 @@
+{
+    // Ajouter un snippet pour insérer automatiquement votre nom
+    "Ajouter nom d'auteur": {
+        "prefix": "auteur",
+        "body": [
+            "Amine El Mednaoui",
+            "$0"
+        ],
+        "description": "Insérer automatiquement le nom de l'auteur"
+    }
+}
