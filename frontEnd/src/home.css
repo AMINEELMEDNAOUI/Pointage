@@ -799,7 +799,6 @@ label[for="horaireSelect"] {
     @media print {
         body {
             margin: 0;
-         
             padding: 0;
         }
         .select-container {
@@ -810,11 +809,11 @@ label[for="horaireSelect"] {
         }
         .period-container {
             position: absolute;
-            top: 13%;
+            top: 15%;
         }
         .table-c {
             position: absolute;
-            top: 22%;
+            top: 24%;
         }
         table {
             page-break-inside: auto;

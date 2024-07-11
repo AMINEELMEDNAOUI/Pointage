@@ -760,63 +760,67 @@ const submitWithoutReplacement = async () => {
 
   const uniqueValuesArray = [];
 
-  salaries.forEach(salary => {
-      
-      const isSameGroup = (item) => 
-          item.PERSMATR === salary.PERSMATR && 
-          item.PERSNOPE === salary.PERSNOPE &&
-          item.PERSPRPE === salary.PERSPRPE &&
-          item.LIBEABR === salary.LIBEABR;
-  
-     
-      let entry = uniqueValuesArray.find(isSameGroup);
-  
-     
-      if (!entry) {
-          entry = {
-              PERSMATR: salary.PERSMATR,
-              PERSNOPE: salary.PERSNOPE,
-              PERSPRPE: salary.PERSPRPE,
-              LIBEABR: salary.LIBEABR,
-              PLANDATE: [],
-              values: [],
-              totalHours: 0,  
-              totalDays: 0    
-          };
-          uniqueValuesArray.push(entry);
-      }
-  
-      
-      entry.PLANDATE.push(salary.PLANDATE);
-      entry.values.push(salary.PLANPAJO);   
+salaries.forEach(salary => {
+    const isSameGroup = (item) => 
+        item.PERSMATR === salary.PERSMATR && 
+        item.PERSNOPE === salary.PERSNOPE &&
+        item.PERSPRPE === salary.PERSPRPE &&
+        item.LIBEABR === salary.LIBEABR;
 
-      const plandate = new Date(salary.PLANDATE);
-  
-        if (!checkAbsence(salary.PERSMATR, plandate)) {
-          entry.totalHours += parseFloat(salary.PLANNBHE.replace(',', '.')); 
-          entry.totalDays += parseFloat(salary.NBREJR);
-       } else {
-        const absence = absences.find(abs => abs.PERSMATR === salary.PERSMATR && new Date(abs.ABSEDEHE) <= plandate && plandate <= new Date(abs.ABSEFIHE));
+    let entry = uniqueValuesArray.find(isSameGroup);
 
-         if (absence) {
-            const ABSENBHR = absence.ABSENBHR;
-            entry.totalHours += parseFloat(salary.PLANNBHE.replace(',', '.'))-ABSENBHR; 
-            entry.totalDays += parseInt(salary.NBREJR) - ABSENBHR / parseFloat(salary.PLANNBHE.replace(',', '.'));
+    if (!entry) {
+        entry = {
+            PERSMATR: salary.PERSMATR,
+            PERSNOPE: salary.PERSNOPE,
+            PERSPRPE: salary.PERSPRPE,
+            LIBEABR: salary.LIBEABR,
+            PLANDATE: [],
+            values: [],
+            totalHours: 0,  
+            totalDays: 0    
+        };
+        uniqueValuesArray.push(entry);
+    }
 
-          
-        }
-       }
-       
-      
-      console.log(`Salary: PERSMATR=${salary.PERSMATR}, PLANDATE=${salary.PLANDATE}, PLANPAJO=${salary.PLANPAJO}`);
-      console.log(`Entry after update:`, entry);
+    entry.PLANDATE.push(salary.PLANDATE);
+    entry.values.push(salary.PLANPAJO);   
+
+    let plandate = new Date(salary.PLANDATE);
     
+    
+    if (plandate.getUTCHours() === 23 && plandate.getUTCMinutes() === 0 && plandate.getUTCSeconds() === 0) {
+        plandate.setUTCHours(plandate.getUTCHours() + 1);
+    }
 
-      
+    console.log(`Checking absence for PERSMATR=${salary.PERSMATR}, PLANDATE=${plandate.toISOString()}, PLANPAJO=${salary.PLANPAJO}`);
+    const isAbsent = checkAbsence(salary.PERSMATR, plandate);
+    console.log(`Is absent? ${isAbsent}`);
 
-  });
-  
-  console.log(`Unique values array after processing:`, uniqueValuesArray);
+    if (!isAbsent) {
+        entry.totalHours += parseFloat(salary.PLANNBHE.replace(',', '.')); 
+        entry.totalDays += parseFloat(salary.NBREJR);
+    } else {
+        const absence = absences.find(abs => {
+            const absenceStart = new Date(abs.ABSEDEHE);
+            const absenceEnd = new Date(abs.ABSEFIHE);
+            return abs.PERSMATR === salary.PERSMATR && absenceStart <= plandate && plandate <= absenceEnd;
+        });
+
+        if (absence) {
+            console.log(`Absence found: ABSEDEHE=${new Date(absence.ABSEDEHE).toISOString()}, ABSEFIHE=${new Date(absence.ABSEFIHE).toISOString()}`);
+            const ABSENBHR = absence.ABSENBHR;
+            entry.totalHours += parseFloat(salary.PLANNBHE.replace(',', '.')) - ABSENBHR; 
+            entry.totalDays += parseInt(salary.NBREJR) - ABSENBHR / parseFloat(salary.PLANNBHE.replace(',', '.'));
+            console.log(`ABSENBHR: ${ABSENBHR}`);
+        }
+    }
+
+    console.log(`Entry after update:`, entry);
+});
+
+console.log(`Unique values array after processing:`, uniqueValuesArray);
+
 
   
 
