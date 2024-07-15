@@ -76,6 +76,8 @@ const [allDay, setAllDay] = useState(false);
 const matriculeInputRef = useRef(null);
 const [heures, setHeures] = useState([]);
 const [loginName, setLoginName] = useState('');
+const [scprouti,setScprouti]=useState('');
+
 
 
 const navigate = useNavigate();
@@ -155,7 +157,8 @@ const generatePDF = () => {
     if (selectedPeriodes && selectedPoles) {
       const [MONTH, YEAR] = selectedPeriodes.split('-');
       const [pole, npole] = selectedPoles.split('-');
-      fetch(`http://localhost:8081/clients?MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}`)
+      const SCPROUTI = scprouti;
+      fetch(`http://localhost:8081/clients?MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}&SCPROUTI=${SCPROUTI}`)
         .then(res => res.json())
         .then(data => setClients(data))
         .catch(err => console.log(err));
@@ -167,7 +170,8 @@ const generatePDF = () => {
       const [TIRID, NAME] = selectedClientsId.split('-');
       const [MONTH, YEAR] = selectedPeriodes.split('-');
       const [pole, npole] = selectedPoles.split('-');
-      fetch(`http://localhost:8081/sites?TIRID=${TIRID}&MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}`)
+      const SCPROUTI = scprouti;
+      fetch(`http://localhost:8081/sites?TIRID=${TIRID}&MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}&SCPROUTI=${SCPROUTI}`)
         .then(res => res.json())
         .then(data => setSites(data))
         .catch(err => console.log(err));
@@ -177,7 +181,8 @@ const generatePDF = () => {
   useEffect(() => {
     if (selectedPeriodes) {
       const [MONTH, YEAR] = selectedPeriodes.split('-');
-      fetch(`http://localhost:8081/poles?MONTH=${MONTH}&YEAR=${YEAR}`)
+      const SCPROUTI = scprouti;
+      fetch(`http://localhost:8081/poles?MONTH=${MONTH}&YEAR=${YEAR}&SCPROUTI=${SCPROUTI}`)
         .then(res => res.json())
         .then(data => setPoles(data))
         .catch(err => console.log(err));
@@ -190,7 +195,8 @@ const generatePDF = () => {
       const [ADRID, SNAME] = selectedSitesId.split('-');
       const [MONTH, YEAR] = selectedPeriodes.split('-');
       const [pole, npole] = selectedPoles.split('-');
-      fetch(`http://localhost:8081/villes?TIRID=${TIRID}&ADRID=${ADRID}&MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}`)
+      const SCPROUTI = scprouti;
+      fetch(`http://localhost:8081/villes?TIRID=${TIRID}&ADRID=${ADRID}&MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}&SCPROUTI=${SCPROUTI}`)
         .then(res => res.json())
         .then(data => setVilles(data))
         .catch(err => console.log(err));
@@ -1087,8 +1093,9 @@ useEffect(() => {
   
   axios.get('http://localhost:8081/protected-route', { withCredentials: true })
       .then(res => {
-          const { name } = res.data;
+          const { name ,scprouti } = res.data;
           setLoginName(name);
+          setScprouti(scprouti);
       })
       .catch(err => {
           console.error('Error fetching protected route:', err);
@@ -1100,7 +1107,7 @@ useEffect(() => {
   return (
     <>
     
-    
+     
        <div className='tit-loguser'>
       <p className='header-title'>Pointage - Cycles par chantier</p>
       <p className='ploguser'><FontAwesomeIcon icon={faUser} className='iconuser'/> {loginName}</p>

@@ -17,7 +17,7 @@ function Login() {
   const [values, setValues] = useState({
     Name: '',
     Password: '',
-    showPassword: false // Ajout de l'état pour gérer l'affichage du mot de passe
+    showPassword: false 
   });
 
   const navigate = useNavigate();
@@ -47,11 +47,11 @@ function Login() {
 
   return (
     <MDBContainer fluid className='d-flex align-items-center justify-content-center bg-image h-100'>
-      <MDBCard className='m-5' style={{ maxWidth: '500px', width: '500px' }}>
+      <MDBCard className='m-5' style={{ maxWidth: '500px', width: '400px',height:'310px' }}>
         <MDBCardBody className='p-5'>
-          <h2 className="text-center mb-5">Login</h2>
+          <h2 className="text-center mb-5" style={{marginTop:'-48px'}}>Login</h2>
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
+            <div className="mb-4" style={{ marginTop:'-30px' }}>
               <label htmlFor="form1" className="form-label">Name</label>
               <MDBInput
                 wrapperClass='mb-4'
@@ -65,7 +65,7 @@ function Login() {
                 onChange={e => setValues({ ...values, Name: e.target.value })}
               />
             </div>
-            <div className="mb-4">
+            <div className="mb-4" style={{ marginTop:'-15px' }}>
               <label htmlFor="form3" className="form-label">Password</label>
               <div className="password-input-wrapper">
                 <MDBInput
@@ -86,7 +86,7 @@ function Login() {
                 />
               </div>
             </div>
-            <MDBBtn type='submit' className='mb-4 w-100 gradient-custom-4' size='lg'>Login</MDBBtn>
+            <MDBBtn type='submit' className='mb-4 w-100 gradient-custom-4' size='lg' style={{ marginTop:'-10px' }}>Login</MDBBtn>
           </form>
         </MDBCardBody>
       </MDBCard>

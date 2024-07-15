@@ -43,7 +43,21 @@ app.get('/clients',(req,res)=>{
     const MONTH =req.query.MONTH ;
     const YEAR = req.query.YEAR ;
     const pole = req.query.pole;
-    const sql =`SELECT DISTINCT IDDETASTAT , LIBESTAT FROM EXT_RHDETASTAT WHERE IDDETASTAT IN (SELECT TIRID FROM EXT_RHPLANNIN WHERE MONTH(PLANDATE)='${MONTH}' AND YEAR(PLANDATE)='${YEAR}' AND STATNATURE='${pole}') AND CODESTAT='05'`;
+    const SCPROUTI=req.query.SCPROUTI;
+    const sql =`SELECT DISTINCT IDDETASTAT , LIBESTAT FROM EXT_RHDETASTAT WHERE IDDETASTAT IN (SELECT CY.TIRID
+FROM EXT_RHGENECYCL1 CY
+INNER JOIN EXT_RHSECUPLAN C ON CY.IDENTECYCL = C.IDENTECYCL
+INNER JOIN EXT_RHGENECYCL1 G ON G.IDENTECYCL = C.IDENTECYCL
+WHERE C.SCPROUTI = '${SCPROUTI}'
+AND EXISTS (
+    SELECT 1
+    FROM EXT_RHPLANNIN P
+    INNER JOIN EXT_RHGENECYCL1 GE ON P.IDENTECYCL = GE.IDENTECYCL
+    WHERE GE.TIRID = CY.TIRID
+    AND GE.ADRID = CY.ADRID
+    AND MONTH(P.PLANDATE)='${MONTH}' AND YEAR(P.PLANDATE)='${YEAR}'
+    AND P.STATNATURE='${pole}'
+)) AND CODESTAT='05';`;
     db.query(sql,(err,data)=>{
         if(err)return res.json(err);
         return res.json(data);
@@ -54,7 +68,22 @@ app.get('/sites', (req, res) => {
     const MONTH =req.query.MONTH ;
     const YEAR = req.query.YEAR ;
     const pole = req.query.pole; 
-    const sql = `SELECT DISTINCT IDDETASTAT , LIBESTAT FROM EXT_RHDETASTAT WHERE IDDETASTAT IN (SELECT ADRID FROM EXT_RHPLANNIN WHERE TIRID='${clientId}' AND MONTH(PLANDATE)='${MONTH}' AND YEAR(PLANDATE)='${YEAR}' AND STATNATURE='${pole}') AND CODESTAT='07'`;
+    const SCPROUTI=req.query.SCPROUTI;
+    const sql = `SELECT DISTINCT IDDETASTAT , LIBESTAT FROM EXT_RHDETASTAT WHERE IDDETASTAT IN (SELECT CY.ADRID
+FROM EXT_RHGENECYCL1 CY
+INNER JOIN EXT_RHSECUPLAN C ON CY.IDENTECYCL = C.IDENTECYCL
+INNER JOIN EXT_RHGENECYCL1 G ON G.IDENTECYCL = C.IDENTECYCL
+WHERE C.SCPROUTI = '${SCPROUTI}'
+AND EXISTS (
+    SELECT 1
+    FROM EXT_RHPLANNIN P
+    INNER JOIN EXT_RHGENECYCL1 GE ON P.IDENTECYCL = GE.IDENTECYCL
+    WHERE GE.TIRID = CY.TIRID
+    AND GE.ADRID = CY.ADRID
+    AND MONTH(P.PLANDATE)='${MONTH}' AND YEAR(P.PLANDATE)='${YEAR}'
+    AND P.STATNATURE='${pole}'
+    AND P.TIRID='${clientId}'
+)) AND CODESTAT='07';`;
     db.query(sql, (err, data) => {
         if (err) return res.json(err);
         return res.json(data);
@@ -64,7 +93,20 @@ app.get('/sites', (req, res) => {
 app.get('/poles', (req, res) => {
     const MONTH =req.query.MONTH ;
     const YEAR = req.query.YEAR ;
-    const sql = `SELECT DISTINCT IDDETASTAT , LIBESTAT FROM EXT_RHDETASTAT WHERE IDDETASTAT IN (SELECT STATNATURE FROM EXT_RHPLANNIN WHERE MONTH(PLANDATE)='${MONTH}' AND YEAR(PLANDATE)='${YEAR}') AND CODESTAT='04'`;
+    const SCPROUTI=req.query.SCPROUTI;
+    const sql = `SELECT DISTINCT IDDETASTAT , LIBESTAT FROM EXT_RHDETASTAT WHERE IDDETASTAT IN (SELECT CY.STATNATURE
+FROM EXT_RHGENECYCL1 CY
+INNER JOIN EXT_RHSECUPLAN C ON CY.IDENTECYCL = C.IDENTECYCL
+INNER JOIN EXT_RHGENECYCL1 G ON G.IDENTECYCL = C.IDENTECYCL
+WHERE C.SCPROUTI = '${SCPROUTI}'
+AND EXISTS (
+    SELECT 1
+    FROM EXT_RHPLANNIN P
+    INNER JOIN EXT_RHGENECYCL1 GE ON P.IDENTECYCL = GE.IDENTECYCL
+    WHERE GE.TIRID = CY.TIRID
+    AND GE.ADRID = CY.ADRID
+    AND MONTH(P.PLANDATE)='${MONTH}' AND YEAR(P.PLANDATE)='${YEAR}'
+)) AND CODESTAT='04';`;
     db.query(sql, (err, data) => {
         if (err) return res.json(err);
         return res.json(data);
@@ -77,7 +119,23 @@ app.get('/villes', (req, res) => {
     const MONTH =req.query.MONTH ;
     const YEAR = req.query.YEAR ;
     const pole = req.query.pole; 
-    const sql = `SELECT DISTINCT IDDETASTAT , LIBESTAT FROM EXT_RHDETASTAT WHERE IDDETASTAT IN (SELECT VILLCODE FROM EXT_RHPLANNIN WHERE TIRID='${clientId}' AND ADRID='${siteId}' AND MONTH(PLANDATE)='${MONTH}' AND YEAR(PLANDATE)='${YEAR}' AND STATNATURE='${pole}') AND CODESTAT='06'`;
+    const SCPROUTI=req.query.SCPROUTI;
+    const sql = `SELECT DISTINCT IDDETASTAT , LIBESTAT FROM EXT_RHDETASTAT WHERE IDDETASTAT IN (SELECT CY.VILLCODE
+FROM EXT_RHGENECYCL1 CY
+INNER JOIN EXT_RHSECUPLAN C ON CY.IDENTECYCL = C.IDENTECYCL
+INNER JOIN EXT_RHGENECYCL1 G ON G.IDENTECYCL = C.IDENTECYCL
+WHERE C.SCPROUTI = '${SCPROUTI}'
+AND EXISTS (
+    SELECT 1
+    FROM EXT_RHPLANNIN P
+    INNER JOIN EXT_RHGENECYCL1 GE ON P.IDENTECYCL = GE.IDENTECYCL
+    WHERE GE.TIRID = CY.TIRID
+    AND GE.ADRID = CY.ADRID
+    AND MONTH(P.PLANDATE)='${MONTH}' AND YEAR(P.PLANDATE)='${YEAR}'
+    AND P.STATNATURE='${pole}'
+    AND P.TIRID='${clientId}'
+    AND P.ADRID='${siteId}'
+)) AND CODESTAT='06';`;
     db.query(sql, (err, data) => {
         if (err) return res.json(err);
         return res.json(data);
@@ -491,22 +549,24 @@ app.get('/heures', (req, res) => {
     })
 })
 
-app.post('/login',(req,res) => {
-    const sql ="select SCPROUTI , SCDESUTI , SCMOTPAS FROM SECURITE WHERE SCPROUTI=? AND SCMOTPAS=? ";
-    db.query(sql,[req.body.Name,req.body.Password],(err,data) =>{
-        if(err) return res.json({Message:"Server Side Error"});
-        if(data.length>0){
-               const name =data[0].SCDESUTI;
-               const token=jwt.sign({name},"our-jsonwebtoken-secret-key",{expiresIn:'1d'});
-               res.cookie('token',token);
-               return res.json({status:"Success"})
-              
-                        }
-        else{
-                return res.json({Message:"nom ou mot de passe incorrect"});
+
+
+app.post('/login', (req, res) => {
+    const sql = "SELECT SCPROUTI, SCDESUTI, SCMOTPAS FROM SECURITE WHERE SCPROUTI=? AND SCMOTPAS=?";
+    db.query(sql, [req.body.Name, req.body.Password], (err, data) => {
+        if (err) return res.json({ Message: "Erreur côté serveur" });
+        if (data.length > 0) {
+            const name = data[0].SCDESUTI;
+            const scprouti = data[0].SCPROUTI; 
+            const token = jwt.sign({ name, scprouti }, "our-jsonwebtoken-secret-key", { expiresIn: '1d' });
+            res.cookie('token', token);
+            return res.json({status:"Success"});
+        } else {
+            return res.json({Message:"nom ou mot de passe incorrect"});
         }
-    })
-})
+    });
+});
+
 
 app.post('/logout', (req, res) => {
     res.clearCookie('token');
@@ -517,21 +577,25 @@ const authenticateJWT = (req, res, next) => {
     const token = req.cookies.token;
     
     if (token) {
-      jwt.verify(token, 'our-jsonwebtoken-secret-key', (err, user) => {
-        if (err) {
-          return res.sendStatus(403); 
-        }
-        req.user = user;
-        next();
-      });
+        jwt.verify(token, 'our-jsonwebtoken-secret-key', (err, decoded) => {
+            if (err) {
+                return res.sendStatus(403);
+            }
+            req.user = {
+                name: decoded.name,
+                scprouti: decoded.scprouti
+            };
+            next();
+        });
     } else {
-      res.sendStatus(401); 
+        res.sendStatus(401);
     }
-  };
-  
-  app.get('/protected-route', authenticateJWT, (req, res) => {
-    res.json({ name: req.user.name }); 
-  });
+};
+
+app.get('/protected-route', authenticateJWT, (req, res) => {
+    res.json({ name: req.user.name, scprouti: req.user.scprouti });
+});
+
   
 
 
