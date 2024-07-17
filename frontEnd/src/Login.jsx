@@ -31,8 +31,8 @@ function Login() {
       .then(res => {
         console.log('Server response:', res.data);
         if (res.data.status === "Success") {
-          // Stocker le token dans le localStorage
           localStorage.setItem('token', res.data.token);
+          message.success(res.data.Message); 
           navigate('/home');
         } else {
           message.error(res.data.Message);
@@ -46,10 +46,10 @@ function Login() {
   };
 
   return (
-    <MDBContainer fluid className='d-flex align-items-center justify-content-center bg-image h-100'>
-      <MDBCard className='m-5' style={{ maxWidth: '500px', width: '400px',height:'310px' }}>
+    <MDBContainer fluid className='d-flex align-items-center justify-content-center bg-image h-100 '>
+      <MDBCard className='m-5' style={{ maxWidth: '500px', width: '400px',height:'320px',backgroundColor:'#f1f1f1' }}>
         <MDBCardBody className='p-5'>
-          <h2 className="text-center mb-5" style={{marginTop:'-48px'}}>Login</h2>
+          <h2 className="text-center mb-5" style={{marginTop:'-39px'}}>Login</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4" style={{ marginTop:'-30px' }}>
               <label htmlFor="form1" className="form-label">Name</label>

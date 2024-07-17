@@ -554,23 +554,23 @@ app.get('/heures', (req, res) => {
 app.post('/login', (req, res) => {
     const sql = "SELECT SCPROUTI, SCDESUTI, SCMOTPAS FROM SECURITE WHERE SCPROUTI=? AND SCMOTPAS=?";
     db.query(sql, [req.body.Name, req.body.Password], (err, data) => {
-        if (err) return res.json({ Message: "Erreur côté serveur" });
-        if (data.length > 0) {
-            const name = data[0].SCDESUTI;
-            const scprouti = data[0].SCPROUTI; 
-            const token = jwt.sign({ name, scprouti }, "our-jsonwebtoken-secret-key", { expiresIn: '1d' });
-            res.cookie('token', token);
-            return res.json({status:"Success"});
-        } else {
-            return res.json({Message:"nom ou mot de passe incorrect"});
-        }
+      if (err) return res.json({ Message: "Erreur côté serveur" });
+      if (data.length > 0) {
+        const name = data[0].SCDESUTI;
+        const scprouti = data[0].SCPROUTI; 
+        const token = jwt.sign({ name, scprouti }, "our-jsonwebtoken-secret-key", { expiresIn: '1d' });
+        res.cookie('token', token);
+        return res.json({status:"Success", token, Message: `Bienvenue ${name}!`});
+      } else {
+        return res.json({Message:"nom ou mot de passe incorrect"});
+      }
     });
-});
+  });
 
 
 app.post('/logout', (req, res) => {
     res.clearCookie('token');
-    return res.json({ status: "Success", message: "Logged out successfully" });
+    return res.json({ status: "Success", Message: "Déconnexion avec succès" });
 });
 
 const authenticateJWT = (req, res, next) => {

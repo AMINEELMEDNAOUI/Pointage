@@ -800,20 +800,31 @@ label[for="horaireSelect"] {
         body {
             margin: 0;
             padding: 0;
+            
         }
+        
         .select-container {
             flex-direction: column;
+            background-color: #f1f1f1;
+            width:100% ;
+
         }
         .pcvc-container {
             position: absolute;
+            background-color: #f1f1f1;
+            width: 100%;
         }
         .period-container {
             position: absolute;
             top: 15%;
+            background-color: #f1f1f1;
+          
+          
         }
         .table-c {
             position: absolute;
             top: 24%;
+            
         }
         table {
             page-break-inside: auto;
@@ -839,6 +850,11 @@ label[for="horaireSelect"] {
     }
 .iconuser{
   margin-right: 3px;
+}
+
+.exit-button:hover
+{
+  color: red;
 }
       
 

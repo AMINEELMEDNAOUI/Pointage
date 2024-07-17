@@ -12,6 +12,8 @@ import { faTimes ,faExpand, faCompress ,faClock } from '@fortawesome/free-solid-
 import { faSortUp, faSortDown ,faSearch,faUser} from '@fortawesome/free-solid-svg-icons';
 import { Select } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { message } from 'antd';
+
 
 import axios from 'axios';
 const { Option } = Select;
@@ -1081,9 +1083,10 @@ const handleLogout = () => {
   axios.post('http://localhost:8081/logout', {}, { withCredentials: true })
     .then(res => {
       if (res.data.status === "Success") {
+        message.success(res.data.Message)
         navigate('/');
       } else {
-        alert(res.data.message);
+        alert(res.data.Message);
       }
     })
     .catch(err => console.log('Error:', err));
