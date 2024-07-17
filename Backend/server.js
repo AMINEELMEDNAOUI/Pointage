@@ -560,13 +560,14 @@ app.post('/login', (req, res) => {
         const scprouti = data[0].SCPROUTI; 
         const token = jwt.sign({ name, scprouti }, "our-jsonwebtoken-secret-key", { expiresIn: '1d' });
         res.cookie('token', token);
-        return res.json({status:"Success", token, Message: `Bienvenue ${name}!`});
+        return res.json({status:"Success", token, Message: `Bienvenue ${name} !`});
       } else {
         return res.json({Message:"nom ou mot de passe incorrect"});
       }
     });
   });
 
+  
 
 app.post('/logout', (req, res) => {
     res.clearCookie('token');
