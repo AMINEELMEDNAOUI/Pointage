@@ -103,3 +103,57 @@ body, html {
 }
 
 
+@media (max-width: 768px) {
+  .mdb-card {
+    width: 90%;
+    margin: 10px;
+  }
+
+  .text-center {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  .mdb-card-body {
+    padding: 20px;
+  }
+
+  .gradient-custom-4 {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .mdb-input input {
+    font-size: 14px;
+  }
+
+  .form-label {
+    font-size: 14px;
+  }
+
+  .toggle-password-icon {
+    right: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .text-center {
+    font-size: 16px;
+  }
+
+  .form-label {
+    font-size: 12px;
+  }
+
+  .mdb-input input {
+    font-size: 12px;
+  }
+
+  .gradient-custom-4 {
+    font-size: 12px;
+  }
+
+  .toggle-password-icon {
+    right: 5px;
+  }
+}

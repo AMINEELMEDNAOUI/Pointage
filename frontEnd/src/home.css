@@ -856,5 +856,156 @@ label[for="horaireSelect"] {
 {
   color: red;
 }
+
+
+
+@media (max-width: 768px) {
+ 
+  .listehor {
+    width: 90%;
+    height: 65vh;
+    max-height: 90vh;
+    overflow-y: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    box-sizing: border-box;
+    flex-direction: column;
+
+  }
+
+  .h1listehor {
+    font-size: 1.2rem;
+  }
+
+  .selecthor {
+    width: 40%;
+    margin-top: 10px;
+  }
+  .horbutt{
+    display: flex;
+    position: relative;
+   margin-right: 100px;
+   height: 70px;
+   width: 202px;
+   margin-bottom: 10px;
+  }
+  .buttonvhor{
+    margin-right: 60px;
+    margin-left: -100px;
+    
+  }
+  .buttonahor{
+    margin-right: 140px;
+    margin-left: -50px;
+    
+  }
+  .buttonvhor, .buttonahor {
+    width: 100%;
+    font-size: 1rem;
+    margin-top: 20px;
+    
+   
+  }
+  
+.titrehor{
+  margin-right: 0;
+  font-size: 1.2rem;
+  text-align: left;
+}
+  .hordiv {
+    height: auto;
+    margin-bottom: 10px;
+  }
+
+  .listeabsence {
+    width: 90%;
+    height: auto;
+    max-height: 80vh;
+    overflow-y: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  
+
+  .titreabs {
+    margin-right: 0;
+    font-size: 1.2rem;
+    text-align: left;
+    margin-left: -20px;
+  }
+
+  .modal-close, .modal-maximize {
+    font-size: 1rem;
+    padding: 5px;
+  }
+
+  .absdiv3 {
+    width: 100%;
+    height: 600px;
+    width: 500px;
+  }
+
+  .absdiv2 {
+   position: relative;
+   margin-bottom: -50px;
+  
+  }
+  .plists{
+   height: 110px;
+    width: 100%;
+    margin-bottom: 5px;
+   
+  }
+
+  
+  .divtypt{
+    position:relative;
+    height:500px;
+    margin-top: 20px;
+    margin-bottom: -200px;
+  }
+  .buttonsabs{
+    display: flex;
+    position: relative;
+    top: 80%;
+    height: 45px;
+    margin-top: 570px;
+    margin-left: 60px;
+  
+  }
+  .buttonvabs,.buttonfabs{
+    width: 86px;
+    margin-top: 21px;
+  }
+  .check1{
+    height: 100px;
+    width: 100%;
+    margin: 0;
+   
+  }
+  .divrech{
+    margin-top: 170px;
+  }
+  .divtab{
+    height: 180px;
+   position: relative;
+   margin-top: -30px;
+  margin-right: 20px;
+  
+  }
+  .tablesal{
+    max-height: 200px;
+    
+  }
+}
+
+
+
       
 
