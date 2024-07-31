@@ -47,7 +47,7 @@ function Login() {
 
   return (
     <MDBContainer fluid className='d-flex align-items-center justify-content-center bg-image h-100 '>
-      <MDBCard className='m-5' style={{ maxWidth: '500px', width: '400px',height:'320px',backgroundColor:'#f1f1f1' , boxShadow: '0 10px 20px rgba(0, 0, 0, 1.2)'}}>
+      <MDBCard className='m-5' style={{ maxWidth: '500px', width: '330px',height:'310px',backgroundColor:'#f1f1f1' , boxShadow: '0 10px 20px rgba(0, 0, 0, 1.2)'}}>
         <MDBCardBody className='p-5'>
           <h2 className="text-center mb-5" style={{marginTop:'-39px'}}>Login</h2>
           <form onSubmit={handleSubmit}>
@@ -86,7 +86,7 @@ function Login() {
                 />
               </div>
             </div>
-            <MDBBtn type='submit' className='mb-4 w-100 gradient-custom-4' size='lg' style={{ marginTop:'-10px' }}>Login</MDBBtn>
+            <MDBBtn type='submit' className='mb-4 w-100 gradient-custom-4' size='lg' style={{ marginTop:'-15px' }}>Login</MDBBtn>
           </form>
         </MDBCardBody>
       </MDBCard>

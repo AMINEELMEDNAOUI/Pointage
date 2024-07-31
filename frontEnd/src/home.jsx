@@ -33,11 +33,6 @@ function Home() {
   const [villes, setVilles] = useState([]);
   const [selectedVilles, setSelectedVilles] = useState('');
   const [salaries, setSalaries] = useState([]);
-  const [planningData, setPlanningData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [currentState, setCurrentState] = useState('');
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [matriculeValue, setMatriculeValue] = useState('');
   const [showListModal,setShowListModal]= useState(false);
  const [tdKey,setTdKey]= useState(null);
  const [trKey,setTrKey]= useState(null);

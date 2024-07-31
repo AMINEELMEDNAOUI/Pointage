@@ -773,9 +773,36 @@ label[for="horaireSelect"] {
         width: 100%;
 
       }
+      .select-pe{
+        margin-left: 10px;
+      }
+
+      @media screen and (max-width: 768px) {
+        .cvc-select ,.pole-select{
+          width: 40vw;; 
+          max-width: auto; 
+          min-width: auto;
+        }
+      }
       
+      @media screen and (max-width: 200px) {
+        .table-container {
+          max-height: 120px;
+          overflow-y: auto;
+        }
+      }
       
     }
+    @media screen and (min-width: 769px) {
+     .period-container{
+      margin-left: 20px;
+     }
+     .select-pe{
+      margin-left: 10px;
+     }
+    }
+  
+    
     
     @media screen and (max-width: 370px) {
      
