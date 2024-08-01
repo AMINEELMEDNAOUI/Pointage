@@ -138,10 +138,10 @@ tr:nth-child(odd) {
  cursor: pointer;
 }
 .falock{
- color:rgb(176, 176, 5);
+ color:rgb(0, 155, 28);
 }
 .faPrint{
-  color: rgb(0, 155, 28);
+  color: rgb(50, 79, 247);
 }
 .table-container {  
   max-height: 520px; 
@@ -872,9 +872,9 @@ label[for="horaireSelect"] {
       font-weight: bolder;
       font-family: Georgia, 'Times New Roman', Times, serif;
       background-color: #f1f1f1;
-      margin-right: 0; /* Margin on the right */
-      margin-bottom: 0; /* Margin at the bottom */
-      margin-left: -40px; /* Margin on the left */
+      margin-right: 0; 
+      margin-bottom: 0; 
+      margin-left: -40px; 
       margin-top: 5px;
     }
     
