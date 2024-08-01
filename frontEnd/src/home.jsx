@@ -12,7 +12,7 @@ import { faTimes ,faExpand, faCompress ,faClock } from '@fortawesome/free-solid-
 import { faSortUp, faSortDown ,faSearch,faUser} from '@fortawesome/free-solid-svg-icons';
 import { Select } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { message } from 'antd';
+import { message ,Button, Modal} from 'antd';
 import axios from 'axios';
 const { Option } = Select;
 
@@ -1100,14 +1100,34 @@ useEffect(() => {
 }, []);
 
 
-
-
+const showConfirm = () => {
+  Modal.confirm({
+    title: 'Êtes-vous sûr ?',
+    content: 'Cette action est irréversible. Veuillez confirmer votre choix.',
+    okText: 'Confirmer',
+    cancelText: 'Annuler',
+    onOk() {
+      message.success('Cycle clôturé');
+      console.log('Cycle closed');
+    },
+    onCancel() {
+      message.info('Action annulée.');
+      console.log('Action cancelled');
+    },
+    okButtonProps: {
+      type: 'primary',
+    },
+    cancelButtonProps: {
+      danger: true, 
+    },
+  });
+};
   return (
     <>
     
      
        <div className='tit-loguser'>
-      <p className='header-title'>Pointage - Cycles par chantier</p>
+  
       <p className='ploguser'><FontAwesomeIcon icon={faUser} className='iconuser'/> {loginName}</p>
       </div>
       <div className='select-container'>
@@ -1234,19 +1254,13 @@ useEffect(() => {
          
           <div className="button-container">
             <div className="print-container">
-              <button className='beach-button'>
-              <FontAwesomeIcon icon={faWater} className='faWater'/> 
-              </button>
-              <button className='umbrella-button'>
-              <FontAwesomeIcon icon={faUmbrellaBeach} className='faUmbrellaBeach' /> 
-              </button>
               <button className="print-button" onClick={handlePrint}>
               Imprimer <FontAwesomeIcon icon={faPrint} className='faPrint'/> 
               </button>
             </div>
             <div className="consolider">
-              <button className='consolider-button'>
-              Clôturer <FontAwesomeIcon icon={faLock} className='falock' /> 
+              <button className='consolider-button' onClick={showConfirm}>
+              Valider <FontAwesomeIcon icon={faLock} className='falock' /> 
               </button>
               <button className='exit-button' onClick={handleLogout}>
               <FontAwesomeIcon icon={faSignOutAlt} className='faSignOutAlt'/>
@@ -1619,6 +1633,7 @@ useEffect(() => {
         </div> : ''}
       </div>
       )}
+   
     
     </>
   );

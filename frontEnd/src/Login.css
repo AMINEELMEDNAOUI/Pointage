@@ -19,19 +19,32 @@ body, html {
 
 .gradient-custom-3 {
   background: linear-gradient(135deg, #6d5bba, #8f66ea, #9b70f8, #a77bff);
+
 }
 
 .gradient-custom-4 {
   background: linear-gradient(135deg, #02b23a, #3ff642, #64dc5e, #9bff99);
   max-height: 50px;
-  
-  
+  height: 50px;
+  width: 100px;
+    
 }
-.gradient-custom-4:hover{
-  background: linear-gradient(135deg, #ff4d4d, #ff6666, #ff8080, #ff9999);
+
+
+.mdb-btn:hover{
+  
   font-weight: bolder;
+ 
   
 }
+
+
+.btn-danger{
+  max-height: 50px;
+ 
+  
+}
+
 
 .mdb-container {
   position: relative;
@@ -50,33 +63,33 @@ body, html {
 
 .text-center  {
   color: #333;
-  font-weight: bold;
+  font-weight:550;
   text-align: center;
   margin-bottom: 20px;
   font-family: Georgia, 'Times New Roman', Times, serif;
-  border: 1px solid #d1d1d1;
-  border-radius: 20px;
   width: 150px;
   margin-left: 40px;
   height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0px -2px 6px 1px rgba(0,0,0,0.42);
-  -webkit-box-shadow: 0px -2px 6px 1px rgba(0,0,0,0.42);
-  -moz-box-shadow: 0px -2px 6px 1px rgba(0,0,0,0.42);
+
 
 }
 
-
+.divflex{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 29px;
+ 
+  
+}
 .mdb-input input {
   border-radius: 10px;
 }
 
-.mdb-btn {
-  border-radius: 10px;
- 
-}
+
 .form-label {
   display: block;
   margin-bottom: 0.5rem;
@@ -101,7 +114,12 @@ body, html {
   cursor: pointer;
   z-index: 1;
 }
-
+.cancel{
+  margin-left: 10px;
+ height: 50px;
+  width: 100px;
+  
+}
 
 @media (max-width: 768px) {
   .mdb-card {

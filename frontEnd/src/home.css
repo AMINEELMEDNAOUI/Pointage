@@ -4,7 +4,7 @@ body {
     margin: 0; 
     padding: 0; 
     overflow: hidden;
-    background-color: #e71818; 
+    background-color: #f1f1f1; 
   
 }
 .horbutt{
@@ -865,16 +865,19 @@ label[for="horaireSelect"] {
     }
     
     .ploguser {
-      position: relative; 
-      width: 100%; 
-      text-align: center;
+      position:relative; 
+      width: 100%;
+      text-align: right;
       font-size: large;
       font-weight: bolder;
       font-family: Georgia, 'Times New Roman', Times, serif;
-      margin-top: 10px; 
       background-color: #f1f1f1;
-      margin: 0;
+      margin-right: 0; /* Margin on the right */
+      margin-bottom: 0; /* Margin at the bottom */
+      margin-left: -40px; /* Margin on the left */
+      margin-top: 5px;
     }
+    
 .iconuser{
   margin-right: 3px;
 }
@@ -883,6 +886,7 @@ label[for="horaireSelect"] {
 {
   color: red;
 }
+
 
 
 
