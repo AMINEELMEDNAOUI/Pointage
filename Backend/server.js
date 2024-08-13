@@ -19,7 +19,7 @@ app.use(cookieParser());
 const db =mysql.createConnection({
     host:"localhost",
     user:"root",
-    password:"secret",
+    password:"",
     database:"POINTAGE"
 })
 
@@ -150,7 +150,7 @@ app.get('/planning', (req, res) => {
     const MONTH =req.query.MONTH ;
     const YEAR = req.query.YEAR ;
     const pole = req.query.pole;
-    const sql = `SELECT PL.PERSMATR , P.PERSNOPE , P.PERSPRPE , PL.PLANPAJO,PL.PLANDATE,TA.LIBEABR,PL.PLANNBHE , (PL.PLANNBHE/PL.PLANBAJO) AS NBREJR  FROM EXT_RHPLANNIN PL JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT WHERE PL.TIRID = '${clientId}'  AND PL.ADRID = '${siteId}'  AND MONTH(PL.PLANDATE) = '${MONTH}'  AND YEAR(PL.PLANDATE) = '${YEAR}'  AND PL.STATNATURE = '${pole}';`;
+    const sql = `SELECT PL.PERSMATR , P.PERSNOPE , P.PERSPRPE , PL.PLANPAJO,PL.PLANDATE,TA.LIBEABR,PL.PLANNBHE , (PL.PLANNBHE/PL.PLANBAJO) AS NBREJR ,PL.ETATVALI FROM EXT_RHPLANNIN PL JOIN EXT_RHPERSONNES P ON PL.PERSMATR = P.PERSMATR JOIN EXT_RHDETASTAT TA ON PL.STATCLAS = TA.IDDETASTAT WHERE PL.TIRID = '${clientId}'  AND PL.ADRID = '${siteId}'  AND MONTH(PL.PLANDATE) = '${MONTH}'  AND YEAR(PL.PLANDATE) = '${YEAR}'  AND PL.STATNATURE = '${pole}';`;
     db.query(sql, (err, data) => {
         if (err) return res.json(err);
         return res.json(data);
@@ -597,7 +597,35 @@ app.get('/protected-route', authenticateJWT, (req, res) => {
     res.json({ name: req.user.name, scprouti: req.user.scprouti });
 });
 
+
+app.put('/planning2', (req, res) => {
+    const clientId = req.body.TIRID; 
+    const siteId = req.body.ADRID; 
+    const MONTH =req.body.MONTH ;
+    const YEAR = req.body.YEAR ;
+    const pole = req.body.pole;
   
+    if (!clientId || !siteId || !MONTH || !YEAR|| !pole ) {
+      return res.status(400).json({ error: 'Tous les champs sont obligatoires.' });
+    }
+  
+    
+    const query = `
+      UPDATE EXT_RHPLANNIN
+      SET ETATVALI = 0
+      WHERE TIRID = ? AND ADRID = ? AND STATNATURE = ? AND MONTH(PLANDATE) = ? AND YEAR(PLANDATE) = ?
+    `;
+    const values = [clientId, siteId, pole,MONTH,YEAR];
+  
+    db.query(query, values, (err, results) => {
+      if (err) {
+        console.error('Erreur lors de la mise à jour du planning :', err);
+        return res.status(500).json({ error: 'Erreur lors de la mise à jour du planning.' });
+      }
+      res.json({ message: 'Planning mis à jour avec succès.', results });
+      console.log('Planning mis à jour avec succès.', results);
+    });
+  });
 
 
 

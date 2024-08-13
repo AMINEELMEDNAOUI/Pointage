@@ -72,6 +72,7 @@ const matriculeInputRef = useRef(null);
 const [heures, setHeures] = useState([]);
 const [loginName, setLoginName] = useState('');
 const [scprouti,setScprouti]=useState('');
+const [confirmed, setConfirmed] = useState(false);
 
 
 
@@ -1099,6 +1100,36 @@ useEffect(() => {
       });
 }, []);
 
+useEffect(() => {
+  if (confirmed) {
+    
+    const [TIRID, CNAME] = selectedClientsId.split('-');
+    const [ADRID, SNAME] = selectedSitesId.split('-');
+    const [MONTH, YEAR] = selectedPeriodes.split('-');
+    const [pole, npole] = selectedPoles.split('-');
+    const data = {
+      TIRID,
+      ADRID,
+      MONTH,
+      YEAR,
+      pole
+    };
+
+    axios.put('http://localhost:8081/planning2', data)
+      .then((response) => {
+        message.success('Cycle clôturé');
+        console.log('Cycle closed', response.data);
+      })
+      .catch((error) => {
+        message.error('Erreur lors de la mise à jour du planning.');
+        console.error('Erreur lors de la mise à jour du planning :', error);
+      })
+      .finally(() => {
+        setConfirmed(false); 
+      });
+  }
+}, [confirmed]);
+
 
 const showConfirm = () => {
   Modal.confirm({
@@ -1107,8 +1138,7 @@ const showConfirm = () => {
     okText: 'Confirmer',
     cancelText: 'Annuler',
     onOk() {
-      message.success('Cycle clôturé');
-      console.log('Cycle closed');
+      setConfirmed(true); 
     },
     onCancel() {
       message.info('Action annulée.');
