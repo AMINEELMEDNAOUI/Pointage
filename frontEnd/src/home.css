@@ -121,7 +121,11 @@ tr:nth-child(odd) {
 .print-button {
   font-weight: bold;
   cursor: pointer;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
 
+.print-button:hover {
+  color: rgb(50, 79, 247);
 }
 .beach-button{
   color: rgb(52, 152, 240);
@@ -134,8 +138,14 @@ tr:nth-child(odd) {
 
 }
 .consolider-button{
-  font-weight: bold;
+ font-weight: bold;
  cursor: pointer;
+ font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.consolider-button:hover {
+  color: rgb(13, 133, 35);
+ 
 }
 .falock{
  color:rgb(0, 155, 28);

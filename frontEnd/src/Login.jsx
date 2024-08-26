@@ -90,7 +90,7 @@ function Login() {
               </div>
             </div>
             <div className='divflex'>
-            <button type='submit' className='mb-4 w-100 gradient-custom-4 mdb-btn btn ' size='lg' style={{ marginTop:'-15px',color:'white' ,fontSize:'larger',fontFamily:' Georgia, "Times New Roman", Times, serif'}}>Valider</button>
+            <button type='submit' className='mb-4 w-100 gradient-custom-4 mdb-btn btn submit ' size='lg' style={{ marginTop:'-15px',color:'white' ,fontSize:'larger',fontFamily:' Georgia, "Times New Roman", Times, serif'}}>Valider</button>
             <button type="button" className="mb-4 w-100 btn btn-danger mdb-btn cancel" size="lg" style={{ marginTop: '-15px' ,fontSize:'larger',fontFamily:' Georgia, "Times New Roman", Times, serif'}} onClick={handleCancel}> Annuler</button>
             </div>
           </form>

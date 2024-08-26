@@ -73,6 +73,7 @@ const [heures, setHeures] = useState([]);
 const [loginName, setLoginName] = useState('');
 const [scprouti,setScprouti]=useState('');
 const [confirmed, setConfirmed] = useState(false);
+const [etatvali, setEtatvali] = useState([]);
 
 
 
@@ -211,6 +212,40 @@ const generatePDF = () => {
         .catch(err => console.log(err));
     }
   }, [selectedPeriodes, selectedPoles, selectedClientsId, selectedSitesId]);
+
+  useEffect(() => {
+    if (selectedPeriodes && selectedPoles && selectedClientsId && selectedSitesId) {
+      const [TIRID, CNAME] = selectedClientsId.split('-');
+      const [ADRID, SNAME] = selectedSitesId.split('-');
+      const [MONTH, YEAR] = selectedPeriodes.split('-');
+      const [pole, npole] = selectedPoles.split('-');
+  
+      fetch(`http://localhost:8081/etatvali?TIRID=${TIRID}&ADRID=${ADRID}&MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}`)
+        .then(res => res.json())
+        .then(data => {
+          
+          if (data && data.length > 0) {
+            const etatValiBuffer = data[0].ETATVALI.data;
+            const etatValiValue = etatValiBuffer[0]; 
+  
+            if (etatValiValue === 1) {
+              console.log("La valeur de ETATVALI est 1.");
+            } else if (etatValiValue === 0) {
+              console.log("La valeur de ETATVALI est 0.");
+            } else {
+              console.log("Valeur inconnue pour ETATVALI.");
+            }
+  
+            
+            setEtatvali(etatValiValue);
+          }
+        })
+        .catch(err => console.log(err));
+    }
+  }, [selectedPeriodes, selectedPoles, selectedClientsId, selectedSitesId]);
+
+ 
+  
   
   useEffect(() => {
     fetch(`http://localhost:8081/natuabs`)
@@ -522,6 +557,35 @@ const fetchData = async () => {
       .catch(err => console.log(err));
   };
 
+  const fetchUpdatedEtatvali = () => {
+    const [TIRID, CNAME] = selectedClientsId.split('-');
+      const [ADRID, SNAME] = selectedSitesId.split('-');
+      const [MONTH, YEAR] = selectedPeriodes.split('-');
+      const [pole, npole] = selectedPoles.split('-');
+  
+      fetch(`http://localhost:8081/etatvali?TIRID=${TIRID}&ADRID=${ADRID}&MONTH=${MONTH}&YEAR=${YEAR}&pole=${pole}`)
+        .then(res => res.json())
+        .then(data => {
+          
+          if (data && data.length > 0) {
+            const etatValiBuffer = data[0].ETATVALI.data;
+            const etatValiValue = etatValiBuffer[0]; 
+  
+            if (etatValiValue === 1) {
+              console.log("La valeur de ETATVALI est 1.");
+            } else if (etatValiValue === 0) {
+              console.log("La valeur de ETATVALI est 0.");
+            } else {
+              console.log("Valeur inconnue pour ETATVALI.");
+            }
+  
+            
+            setEtatvali(etatValiValue);
+          }
+        })
+        .catch(err => console.log(err));
+    };
+
   const handleFormSubmit2 = () => {
   if (remplace) {
     submitWithReplacement();
@@ -784,6 +848,7 @@ salaries.forEach(salary => {
         };
         uniqueValuesArray.push(entry);
     }
+   
 
     entry.PLANDATE.push(salary.PLANDATE);
     entry.values.push(salary.PLANPAJO);   
@@ -1119,6 +1184,7 @@ useEffect(() => {
       .then((response) => {
         message.success('Cycle clôturé');
         console.log('Cycle closed', response.data);
+        fetchUpdatedEtatvali();
       })
       .catch((error) => {
         message.error('Erreur lors de la mise à jour du planning.');
@@ -1403,7 +1469,7 @@ const showConfirm = () => {
           >
             {cellValue}
 
-            {showListModal && tdKey === i && trKey === index && matchingValue ? 
+            {etatvali===1 && showListModal && tdKey === i && trKey === index && matchingValue ? 
               <div className="liste" ref={listModalRef}>
                 <p className='pliste1' onClick={(e) => handleChangeHoraire(e)}>Modifier Horaire</p> 
                 <p className='pliste2' onClick={(e) => handleAbsence(e)}>Ajouter Abscence</p>

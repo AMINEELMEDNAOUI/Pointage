@@ -627,6 +627,18 @@ app.put('/planning2', (req, res) => {
     });
   });
 
+  app.get('/etatvali', (req, res) => {
+    const clientId = req.query.TIRID; 
+    const siteId = req.query.ADRID; 
+    const MONTH =req.query.MONTH ;
+    const YEAR = req.query.YEAR ;
+    const pole = req.query.pole;
+    const sql = `SELECT ETATVALI FROM EXT_RHPLANNIN WHERE TIRID = '${clientId}'  AND ADRID = '${siteId}'  AND MONTH(PLANDATE) = '${MONTH}'  AND YEAR(PLANDATE) = '${YEAR}'  AND STATNATURE = '${pole}' LIMIT 1;`;
+    db.query(sql, (err, data) => {
+        if (err) return res.json(err);
+        return res.json(data);
+    })
+})
 
 
 app.listen(8081,()=>{
