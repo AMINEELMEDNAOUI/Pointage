@@ -156,12 +156,14 @@ body, html {
   .toggle-password-icon {
     right: 5px;
   }
+  
 }
 
 @media (max-width: 480px) {
   .text-center {
     font-size: 16px;
   }
+
 
   .form-label {
     font-size: 12px;
@@ -179,3 +181,4 @@ body, html {
     right: 5px;
   }
 }
+

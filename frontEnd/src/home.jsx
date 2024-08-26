@@ -1393,15 +1393,16 @@ const showConfirm = () => {
         <>
           Nom et Prenom
           <FontAwesomeIcon
-            icon={faSearch}
-            onClick={() => setShowSearchName(!showSearchName)}
-            style={{ cursor: 'pointer', marginLeft: '5px' }}
-          />
-          <FontAwesomeIcon
             icon={sortConfig.key === 'PERSNOPE' && sortConfig.direction === 'ascending' ? faSortUp : faSortDown}
             onClick={() => handleSort('PERSNOPE')}
             style={{ cursor: 'pointer', marginLeft: '5px' }}
           />
+          <FontAwesomeIcon
+            icon={faSearch}
+            onClick={() => setShowSearchName(!showSearchName)}
+            style={{ cursor: 'pointer', marginLeft: '5px' }}
+          />
+         
         </>
       )}
     </td>
@@ -1419,15 +1420,16 @@ const showConfirm = () => {
         <>
           Matricule
           <FontAwesomeIcon
-            icon={faSearch}
-            onClick={() => setShowSearchMatricule(!showSearchMatricule)}
-            style={{ cursor: 'pointer', marginLeft: '5px' }}
-          />
-          <FontAwesomeIcon
             icon={sortConfig.key === 'PERSMATR' && sortConfig.direction === 'ascending' ? faSortUp : faSortDown}
             onClick={() => handleSort('PERSMATR')}
             style={{ cursor: 'pointer', marginLeft: '5px' }}
           />
+          <FontAwesomeIcon
+            icon={faSearch}
+            onClick={() => setShowSearchMatricule(!showSearchMatricule)}
+            style={{ cursor: 'pointer', marginLeft: '5px' }}
+          />
+         
         </>
       )}
     </td>

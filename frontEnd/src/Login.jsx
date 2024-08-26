@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-
+import { faUser} from '@fortawesome/free-solid-svg-icons';
 function Login() {
   const [values, setValues] = useState({
     Name: '',
